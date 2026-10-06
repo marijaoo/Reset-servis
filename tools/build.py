@@ -31,7 +31,7 @@ def head(title, desc):
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>{title}</title>
 <meta name="description" content="{desc}">
-<meta name="theme-color" content="#0a0c0f">
+<meta name="theme-color" content="#0b6e8a">
 <script>(function(){{var r=document.documentElement;try{{var t=localStorage.getItem('rs-theme');if(t)r.setAttribute('data-theme',t);}}catch(e){{}}try{{if(!sessionStorage.getItem('rs-loaded')&&!matchMedia('(prefers-reduced-motion: reduce)').matches){{r.classList.add('show-loader');sessionStorage.setItem('rs-loaded','1');}}}}catch(e){{}}}})();</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
