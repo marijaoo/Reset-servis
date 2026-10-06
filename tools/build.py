@@ -79,7 +79,7 @@ def header(current):
 def footer():
     svc = "".join(f'<li><a href="{href(s)}">{s["title"]}</a></li>' for s in SERVICES[:6])
     return f'''
-<footer class="site-footer">
+<footer class="site-footer island">
   <div class="wrap">
     <div class="footer-top">
       <div class="newsletter">
@@ -132,7 +132,7 @@ def pagehead(crumb, h1, lead, extra=""):
 
 def cta(h="Opišite kvar. Javljamo vam procenu istog dana.", p="Pošaljite kratak opis problema i model uređaja, ili zakažite termin za dva minuta.", btn="Zakaži servis"):
     return f'''<section class="section-tight">
-  <div class="wrap"><div class="cta"><p class="eyebrow">Spremni kad i vi</p><h2 class="split">{h}</h2><p class="lead">{p}</p><div class="btn-row"><a class="btn btn-primary magnetic" href="kontakt.html#zakazivanje">{btn} {ARROW}</a><a class="btn btn-ghost" href="status.html">Proveri status popravke</a></div></div></div>
+  <div class="wrap"><div class="cta island"><p class="eyebrow">Spremni kad i vi</p><h2 class="split">{h}</h2><p class="lead">{p}</p><div class="btn-row"><a class="btn btn-primary magnetic" href="kontakt.html#zakazivanje">{btn} {ARROW}</a><a class="btn btn-ghost" href="status.html">Proveri status popravke</a></div></div></div>
 </section>'''
 
 def svc_card(s):
@@ -165,7 +165,7 @@ def calculator():
       <div class="calc-group"><label for="calc-issue">2 · Problem</label><select id="calc-issue" name="calc-issue">{opts}</select></div>
       <fieldset class="calc-group"><legend>3 · Brzina</legend><div class="seg"><label><input type="radio" name="calc-speed" value="std" checked><span>Standardno</span></label><label><input type="radio" name="calc-speed" value="fast"><span>Hitno, isti dan (+30%)</span></label></div></fieldset>
     </form>
-    <div class="calc-out" aria-live="polite">
+    <div class="calc-out island" aria-live="polite">
       <div style="display:grid;gap:10px"><span class="eyebrow">Okvirna cena <span class="probno">probno</span></span>
       <div class="calc-price"><span data-calc-price>3.500–4.500</span><small>RSD</small></div></div>
       <div class="calc-lines"><div><span>Rok</span><b data-calc-time>24 h</b></div><div><span>Dijagnostika</span><b>0 RSD uz popravku</b></div><div><span>Garancija</span><b>6 meseci</b></div></div>
@@ -244,7 +244,7 @@ home = f'''
         <span><span class="stars" aria-hidden="true">★★★★★</span> 4,9 od 5 · 2.400+ popravki <span class="probno">probno</span></span>
       </div>
     </div>
-    <div class="console" data-tilt>
+    <div class="console island" data-tilt>
       <span class="float-chip c2"><span class="dot"></span>Garancija 6 meseci</span>
       <div class="console-inner">
         <div class="console-top"><div class="lights" aria-hidden="true"><i></i><i></i><i></i></div><span>RN-2026-0417 · dijagnostika uživo</span><span class="probno">demo</span></div>

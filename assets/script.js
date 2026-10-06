@@ -230,7 +230,7 @@
     var ctx = canvas.getContext('2d'), pts = [], temp = 68, tempEl = $('[data-temp]'), fanEl = $('[data-fan]');
     for (var k = 0; k < 60; k++) { temp += (Math.random() - .5) * 2.2; temp = Math.max(62, Math.min(75, temp)); pts.push(temp); }
     var colors = {};
-    var readColors = function () { var cs = getComputedStyle(root); colors.a = cs.getPropertyValue('--accent').trim(); colors.b = cs.getPropertyValue('--accent-2').trim(); colors.l = cs.getPropertyValue('--line').trim(); };
+    var readColors = function () { var cs = getComputedStyle(canvas); colors.a = cs.getPropertyValue('--accent').trim(); colors.b = cs.getPropertyValue('--accent-2').trim(); colors.l = cs.getPropertyValue('--line').trim(); };
     readColors(); document.addEventListener('rs-theme', function () { setTimeout(function () { readColors(); draw(); }, 30); });
     var draw = function () {
       var w = canvas.clientWidth, h = canvas.clientHeight, dpr = Math.min(2, window.devicePixelRatio || 1);

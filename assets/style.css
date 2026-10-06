@@ -1,9 +1,12 @@
 /* Raspored: radionički "radni nalog" u modernom ruhu — petrolej plava i LED žuta; veliki naslovi, bento mreža usluga, lepljivo pripovedanje postupka, staklena navigacija */
 :root {
-  --bg: #f2f4f6; --bg-2: #e9edf0; --surface: #ffffff; --surface-2: #f7f9fa; --ink: #15202b; --muted: #56636f;
-  --line: #d9dfe5; --line-2: #c8d1d9; --accent: #0b6e8a; --accent-2: #3a9bb8; --accent-ink: #ffffff; --signal: #e09a12;
-  --ok: #2f8a4c; --danger: #c0492f; --demo-bg: #fff4d6; --demo-ink: #6b4a00; --glass: rgba(242, 244, 246, .74);
-  --shadow: 0 26px 60px -36px rgba(21, 32, 43, .38); --grain-opacity: .03; --aurora-op: .4; --aurora-blend: multiply;
+  --bg: #edf2f6; --bg-2: #e3eaf0; --surface: #ffffff; --surface-2: #f5f8fb; --ink: #0f1d2a; --muted: #4f606e;
+  --line: #d8e1e9; --line-2: #c6d2dc; --accent: #0b6e8a; --accent-2: #2a91b3; --accent-ink: #ffffff; --signal: #e09a12;
+  --ok: #2f8a4c; --danger: #c0492f; --demo-bg: #fff4d6; --demo-ink: #6b4a00; --glass: rgba(240, 245, 249, .72);
+  --shadow: 0 1px 2px rgba(15, 45, 70, .05), 0 24px 50px -28px rgba(15, 55, 85, .32);
+  --card-shadow: 0 1px 2px rgba(15, 45, 70, .04), 0 12px 32px -20px rgba(15, 55, 85, .22);
+  --page-glow: radial-gradient(1100px 620px at 85% -8%, rgba(11, 110, 138, .13), transparent 62%), radial-gradient(900px 520px at -10% 30%, rgba(224, 154, 18, .07), transparent 60%);
+  --grain-opacity: .025; --aurora-op: .45; --aurora-blend: multiply;
   --il-bg: color-mix(in srgb, var(--accent) 10%, var(--surface));
   --font-display: "Geist", "Inter", "Segoe UI", system-ui, sans-serif;
   --font-body: "Geist", "Segoe UI", system-ui, sans-serif;
@@ -21,15 +24,34 @@
     --bg: #0f161d; --bg-2: #131c24; --surface: #17212b; --surface-2: #1c2833; --ink: #e6ecf1; --muted: #9aa8b5;
     --line: #26333f; --line-2: #33424f; --accent: #4cb8d6; --accent-2: #2e8fae; --accent-ink: #0b1a22; --signal: #f2b33d;
     --ok: #5cc27d; --danger: #e0715a; --demo-bg: #3a2c0b; --demo-ink: #ffd98a; --glass: rgba(15, 22, 29, .68);
-    --shadow: 0 30px 80px -40px rgba(0, 0, 0, .75); --grain-opacity: .05; --aurora-op: .5; --aurora-blend: screen;
+    --shadow: 0 30px 80px -40px rgba(0, 0, 0, .75); --card-shadow: none;
+    --page-glow: radial-gradient(1100px 620px at 85% -8%, rgba(76, 184, 214, .10), transparent 62%);
+    --grain-opacity: .05; --aurora-op: .5; --aurora-blend: screen;
+    --il-bg: color-mix(in srgb, var(--accent) 10%, var(--surface));
     color-scheme: dark;
   }
 }
 :root[data-theme="dark"] {
-  --bg: #0f161d; --bg-2: #131c24; --surface: #17212b; --surface-2: #1c2833; --ink: #e6ecf1; --muted: #9aa8b5;
+    --bg: #0f161d; --bg-2: #131c24; --surface: #17212b; --surface-2: #1c2833; --ink: #e6ecf1; --muted: #9aa8b5;
     --line: #26333f; --line-2: #33424f; --accent: #4cb8d6; --accent-2: #2e8fae; --accent-ink: #0b1a22; --signal: #f2b33d;
     --ok: #5cc27d; --danger: #e0715a; --demo-bg: #3a2c0b; --demo-ink: #ffd98a; --glass: rgba(15, 22, 29, .68);
-    --shadow: 0 30px 80px -40px rgba(0, 0, 0, .75); --grain-opacity: .05; --aurora-op: .5; --aurora-blend: screen;
+    --shadow: 0 30px 80px -40px rgba(0, 0, 0, .75); --card-shadow: none;
+    --page-glow: radial-gradient(1100px 620px at 85% -8%, rgba(76, 184, 214, .10), transparent 62%);
+    --grain-opacity: .05; --aurora-op: .5; --aurora-blend: screen;
+    --il-bg: color-mix(in srgb, var(--accent) 10%, var(--surface));
+  color-scheme: dark;
+}
+/* "Tamna ostrva": isti delovi su tamni u obe teme (konzola, cena u kalkulatoru, poziv na akciju, podnožje),
+   pa svetla tema nosi isti karakter kao tamna. */
+.island {
+    --bg: #0f161d; --bg-2: #131c24; --surface: #17212b; --surface-2: #1c2833; --ink: #e6ecf1; --muted: #9aa8b5;
+    --line: #26333f; --line-2: #33424f; --accent: #4cb8d6; --accent-2: #2e8fae; --accent-ink: #0b1a22; --signal: #f2b33d;
+    --ok: #5cc27d; --danger: #e0715a; --demo-bg: #3a2c0b; --demo-ink: #ffd98a; --glass: rgba(15, 22, 29, .68);
+    --shadow: 0 30px 80px -40px rgba(0, 0, 0, .75); --card-shadow: none;
+    --page-glow: radial-gradient(1100px 620px at 85% -8%, rgba(76, 184, 214, .10), transparent 62%);
+    --grain-opacity: .05; --aurora-op: .5; --aurora-blend: screen;
+    --il-bg: color-mix(in srgb, var(--accent) 10%, var(--surface));
+  color: var(--ink);
   color-scheme: dark;
 }
 
@@ -45,7 +67,7 @@ html.lenis, html.lenis body { height: auto; }
   *, *::before, *::after { transition-duration: .01ms !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; }
 }
 body {
-  margin: 0; background: var(--bg); color: var(--ink);
+  margin: 0; background: var(--page-glow), var(--bg); background-repeat: no-repeat; color: var(--ink);
   font: 400 1.0625rem/1.65 var(--font-body);
   -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility;
   overflow-x: clip;
@@ -488,15 +510,13 @@ textarea { min-height: 130px; resize: vertical; }
 
 /* ---------- CTA ---------- */
 .cta { position: relative; border-radius: 28px; padding: clamp(32px, 6vw, 80px); display: grid; gap: 22px; overflow: hidden; isolation: isolate; border: 1px solid var(--line-2); background: radial-gradient(800px 400px at 85% 0%, color-mix(in srgb, var(--accent) 22%, transparent), transparent 60%), radial-gradient(600px 300px at 0% 100%, color-mix(in srgb, var(--accent-2) 14%, transparent), transparent 60%), var(--surface); justify-items: start; }
-.cta { background: radial-gradient(800px 400px at 85% 0%, color-mix(in srgb, var(--accent) 35%, transparent), transparent 60%), #15202b; border-color: #15202b; color: #e6ecf1; }
-.cta .eyebrow { color: #4cb8d6; }
+.cta { background: radial-gradient(800px 400px at 85% 0%, color-mix(in srgb, var(--accent) 30%, transparent), transparent 60%), radial-gradient(600px 300px at 0% 100%, color-mix(in srgb, var(--signal) 10%, transparent), transparent 60%), var(--bg-2); border-color: var(--line-2); box-shadow: var(--shadow); }
 .cta .btn-primary { background: var(--signal); color: #1b1300; box-shadow: 0 10px 30px -10px color-mix(in srgb, var(--signal) 70%, transparent); }
-.cta .btn-ghost { color: #e6ecf1; border-color: rgba(230, 236, 241, .25); background: transparent; }
 .cta h2 { max-width: 18ch; }
-.cta p { color: rgba(230, 236, 241, .72); }
+.cta p { color: var(--muted); }
 
 /* ---------- Podnožje ---------- */
-.site-footer { border-top: 1px solid var(--line); padding-block: 72px 32px; margin-top: 40px; color: var(--muted); font-size: .92rem; overflow: hidden; }
+.site-footer { background: radial-gradient(900px 400px at 90% 0%, color-mix(in srgb, var(--accent) 12%, transparent), transparent 60%), var(--bg); border-top: 1px solid var(--line); padding-block: 72px 32px; margin-top: 40px; color: var(--muted); font-size: .92rem; overflow: hidden; }
 .footer-top { display: grid; gap: 40px; }
 @media (min-width: 900px) { .footer-top { grid-template-columns: 1.3fr 2fr; gap: 64px; } }
 .newsletter { display: grid; gap: 14px; align-content: start; }
@@ -653,3 +673,13 @@ textarea { min-height: 130px; resize: vertical; }
 @media (max-width: 1140px) { .search-btn .label { display: none; } .search-btn { padding: 0 8px 0 12px; } }
 .float-chip.c1 { left: -22px; bottom: -20px; }
 .t-a .tile-illus { max-width: 380px; }
+
+
+/* ---------- Svetla tema: meke senke i fini detalji ---------- */
+.card, .tile, .list-box, .range-chart, .ba, details, .review, .wizard, .track-form, .map-box, .table-wrap, .temp-pair div, .step-illus, .story-stage, .illus-panel, .calc { box-shadow: var(--card-shadow); }
+.tile, .card { background: linear-gradient(180deg, var(--surface), var(--surface-2)); }
+.island.console { box-shadow: 0 40px 80px -30px rgba(10, 30, 45, .55); }
+.island .console-inner { background: color-mix(in srgb, var(--surface) 94%, transparent); }
+.calc-out.island { color: var(--ink); }
+.site-header.scrolled { box-shadow: 0 10px 30px -24px rgba(15, 45, 70, .35); }
+.grid-lines { opacity: .45; }
