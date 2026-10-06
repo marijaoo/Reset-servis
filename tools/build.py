@@ -1,8 +1,21 @@
 """Generiše sve HTML stranice sajta i indeks za pretragu. Pokretanje: python3 tools/build.py"""
-import json, pathlib, sys
+import json, pathlib, re, sys
 sys.path.insert(0, str(pathlib.Path(__file__).parent))
 from illus import SERVICE as SVC_ILLUS, PHASE as PHASE_ILLUS, PHASE_ICONS, fan_scene, MAP_ART
 from data import ICONS, SERVICES, STEPS, faq as FAQ
+import html as _html
+
+CFG = json.loads((pathlib.Path(__file__).resolve().parent.parent / "config" / "site.json").read_text(encoding="utf-8"))
+DEMO = bool(CFG.get("demo"))
+BIZ = CFG["business"]; C = CFG["contact"]; H = CFG["hours"]
+def esc(x): return _html.escape(str(x), quote=True)
+def P(label="probno"):
+    """Oznaka za probne podatke; u pravom režimu (demo: false) se ne prikazuje."""
+    return f'<span class="probno">{label}</span>' if DEMO else ""
+def tel(n): return re.sub(r"[^\d+]", "", n)
+def hrs(pair, sep="–"): return f"{pair[0]}{sep}{pair[1]}" if pair else "zatvoreno"
+def hshort(pair): return f"{pair[0][:2].lstrip('0')}–{pair[1][:2].lstrip('0')} h" if pair else "zatvoreno"
+ADDRESS = f'{C["street"]}, {C["postal"]} {C["city"]}'
 
 OUT = pathlib.Path(__file__).resolve().parent.parent
 BY_SLUG = {s["slug"]: s for s in SERVICES}
@@ -23,14 +36,32 @@ CLOSE = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width
 
 NAV = [("usluge.html", "Usluge"), ("postupak.html", "Postupak"), ("status.html", "Status popravke"), ("pitanja.html", "Pitanja"), ("kontakt.html", "Kontakt")]
 
-def head(title, desc):
+def jsonld():
+    oh = []
+    if H.get("weekdays"): oh.append({"@type": "OpeningHoursSpecification", "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"], "opens": H["weekdays"][0], "closes": H["weekdays"][1]})
+    if H.get("saturday"): oh.append({"@type": "OpeningHoursSpecification", "dayOfWeek": "Saturday", "opens": H["saturday"][0], "closes": H["saturday"][1]})
+    if H.get("sunday"): oh.append({"@type": "OpeningHoursSpecification", "dayOfWeek": "Sunday", "opens": H["sunday"][0], "closes": H["sunday"][1]})
+    d = {"@context": "https://schema.org", "@type": "ComputerStore", "name": BIZ["name"], "url": CFG["siteUrl"], "telephone": C["phone"], "email": C["email"],
+         "address": {"@type": "PostalAddress", "streetAddress": C["street"], "postalCode": C["postal"], "addressLocality": C["city"], "addressCountry": "RS"},
+         "openingHoursSpecification": oh}
+    return json.dumps(d, ensure_ascii=False).replace("</", "<\\/")
+
+def head(title, desc, fname="index.html"):
+    url = CFG["siteUrl"].rstrip("/") + "/" + ("" if fname == "index.html" else fname)
+    robots = '<meta name="robots" content="noindex">' if DEMO or fname == "404.html" else ""
     return f'''<!doctype html>
 <html lang="sr-Latn">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>{title}</title>
-<meta name="description" content="{desc}">
+<title>{esc(title)}</title>
+<meta name="description" content="{esc(desc)}">
+<link rel="canonical" href="{url}">
+<meta property="og:type" content="website"><meta property="og:locale" content="sr_RS"><meta property="og:site_name" content="{esc(BIZ["name"])}">
+<meta property="og:title" content="{esc(title)}"><meta property="og:description" content="{esc(desc)}"><meta property="og:url" content="{url}"><meta property="og:image" content="{CFG["siteUrl"].rstrip("/")}/assets/og.png">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+{robots}
+<script type="application/ld+json">{jsonld()}</script>
 <meta name="theme-color" content="#0b6e8a">
 <script>(function(){{var r=document.documentElement;try{{var t=localStorage.getItem('rs-theme');if(t)r.setAttribute('data-theme',t);}}catch(e){{}}try{{if(!sessionStorage.getItem('rs-loaded')&&!matchMedia('(prefers-reduced-motion: reduce)').matches){{r.classList.add('show-loader');sessionStorage.setItem('rs-loaded','1');}}}}catch(e){{}}}})();</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -45,6 +76,10 @@ def mega():
     links = "".join(f'<a href="{href(s)}"><span class="mi">{ICONS[s["icon"]]}</span><strong>{s["title"]}</strong><span>od {rsd(low(s))} RSD · {s["time"]}</span></a>' for s in SERVICES)
     return f'<div class="mega" role="menu">{links}<a class="mega-all" href="usluge.html"><span>Sve usluge i cenovnik</span>{ARROW}</a></div>'
 
+DEMO_BAR = '''<div class="demo-bar" role="note">
+  <div class="wrap"><span class="tag">Demo</span> Ovo je probni sajt. Naziv, adresa, telefon, cene, ocene i recenzije su izmišljeni podaci za pregled.</div>
+</div>''' if DEMO else ""
+
 def header(current):
     def cur(h): return ' aria-current="page"' if h == current else ""
     items = f'<div class="nav-item"><a href="usluge.html"{cur("usluge.html")}>Usluge {CHEV}</a>{mega()}</div>'
@@ -53,15 +88,13 @@ def header(current):
     return f'''
 <div class="loader" aria-hidden="true"><div class="loader-inner"><span class="logo-mark">R/</span><div class="loader-count" data-loader-count>0</div><div class="loader-line"><i data-loader-line></i></div></div></div>
 <div class="progress-bar" aria-hidden="true"></div>
-<div class="demo-bar" role="note">
-  <div class="wrap"><span class="tag">Demo</span> Ovo je probni sajt. Naziv, adresa, telefon, cene, ocene i recenzije su izmišljeni podaci za pregled.</div>
-</div>
+{DEMO_BAR}
 <header class="site-header">
   <div class="wrap nav-row">
-    <a class="logo" href="index.html" aria-label="Reset servis, početna"><span class="logo-mark">R/</span>Reset servis</a>
+    <a class="logo" href="index.html" aria-label="{esc(BIZ['name'])}, početna"><span class="logo-mark">R/</span>{esc(BIZ['name'])}</a>
     <nav class="nav" aria-label="Glavni meni">{items}</nav>
     <div class="nav-tools">
-      <a class="status-link" href="kontakt.html"><span class="dot" data-open-dot></span><span data-open-text>Pon–Pet 09–19 h</span></a>
+      <a class="status-link" href="kontakt.html"><span class="dot" data-open-dot></span><span data-open-text>Pon–Pet {hshort(H["weekdays"])}</span></a>
       <button class="search-btn" type="button" data-palette-open aria-label="Pretraži sajt">{SEARCH}<span class="label">Pretraga</span><kbd>Ctrl K</kbd></button>
       <button class="icon-btn theme-btn" type="button" data-theme-toggle aria-label="Promeni svetlu ili tamnu temu">{SUN}{MOON}</button>
       <a class="btn btn-primary btn-sm magnetic" href="kontakt.html">Prijavi kvar</a>
@@ -70,9 +103,9 @@ def header(current):
   </div>
 </header>
 <div class="mobile-menu" id="mobilni-meni" aria-hidden="true">
-  <div class="mm-top"><a class="logo" href="index.html"><span class="logo-mark">R/</span>Reset servis</a><button class="icon-btn" type="button" data-menu-close aria-label="Zatvori meni">{CLOSE}</button></div>
+  <div class="mm-top"><a class="logo" href="index.html"><span class="logo-mark">R/</span>{esc(BIZ['name'])}</a><button class="icon-btn" type="button" data-menu-close aria-label="Zatvori meni">{CLOSE}</button></div>
   <nav class="mm-links" aria-label="Mobilni meni">{mm}</nav>
-  <div class="mm-foot"><a class="btn btn-primary" href="kontakt.html">Prijavi kvar {ARROW}</a><span>+381 11 000 0000 <span class="probno">probno</span></span></div>
+  <div class="mm-foot"><a class="btn btn-primary" href="kontakt.html">Prijavi kvar {ARROW}</a><span>{esc(C["phone"])} {P()}</span></div>
 </div>
 '''
 
@@ -86,17 +119,17 @@ def footer():
         <h3>Saveti za duži život vašeg laptopa</h3>
         <p>Jednom mesečno: kako da čuvate bateriju, kada da očistite ventilator i šta da radite kad prospete kafu.</p>
         <form class="nl-row" data-demo-form novalidate><input id="nl-email" type="email" placeholder="vasa@adresa.rs" aria-label="Vaša e-pošta" autocomplete="email"><button class="btn btn-ghost" type="submit">Prijavi se</button></form>
-        <p class="form-msg" tabindex="-1" hidden>Ovo je demo, pa prijava nije poslata.</p>
+        <p class="form-msg" tabindex="-1" hidden data-nl-msg></p>
       </div>
       <div class="footer-grid">
         <div><h3>Usluge</h3><ul>{svc}<li><a href="usluge.html">Sve usluge →</a></li></ul></div>
-        <div><h3>Servis</h3><ul><li><a href="postupak.html">Postupak</a></li><li><a href="status.html">Status popravke</a></li><li><a href="pitanja.html">Česta pitanja</a></li><li><a href="kontakt.html">Zakazivanje</a></li></ul></div>
-        <div><h3>Kontakt <span class="probno">probno</span></h3><ul><li>Bulevar kralja Aleksandra 000</li><li>11000 Beograd</li><li>+381 11 000 0000</li><li>servis@primer.rs</li></ul></div>
-        <div><h3>Radno vreme <span class="probno">probno</span></h3><ul><li>Pon–Pet: 09–19 h</li><li>Subota: 10–15 h</li><li>Nedelja: zatvoreno</li></ul></div>
+        <div><h3>Servis</h3><ul><li><a href="postupak.html">Postupak</a></li><li><a href="status.html">Status popravke</a></li><li><a href="pitanja.html">Česta pitanja</a></li><li><a href="kontakt.html">Zakazivanje</a></li><li><a href="privatnost.html">Privatnost</a></li></ul></div>
+        <div><h3>Kontakt {P()}</h3><ul><li>{esc(C["street"])}</li><li>{esc(C["postal"])} {esc(C["city"])}</li><li>{esc(C["phone"])}</li><li>{esc(C["email"])}</li></ul></div>
+        <div><h3>Radno vreme {P()}</h3><ul><li>Pon–Pet: {hshort(H["weekdays"])}</li><li>Subota: {hshort(H["saturday"])}</li><li>Nedelja: {hshort(H["sunday"])}</li></ul></div>
       </div>
     </div>
-    <div class="wordmark" aria-hidden="true">Reset servis</div>
-    <div class="footer-bottom"><span>© <span id="godina">2026</span> Reset servis. Demo sajt, svi podaci su probni.</span><span>Beograd, Srbija</span></div>
+    <div class="wordmark" aria-hidden="true">{esc(BIZ['name'])}</div>
+    <div class="footer-bottom"><span>© <span id="godina">2026</span> {esc(BIZ["legalName"] or BIZ["name"])}{(" · PIB " + esc(BIZ["pib"])) if BIZ.get("pib") else ""}{". Demo sajt, svi podaci su probni." if DEMO else ""}</span><span><a href="privatnost.html">Politika privatnosti</a> · {esc(C["city"])}, Srbija</span></div>
   </div>
 </footer>
 <div class="action-bar"><a class="btn btn-ghost" href="kontakt.html">Kontakt</a><a class="btn btn-primary" href="kontakt.html#zakazivanje">Prijavi kvar</a></div>
@@ -104,7 +137,7 @@ def footer():
   <svg class="ring" viewBox="0 0 58 58" aria-hidden="true"><circle cx="29" cy="29" r="27"/></svg>
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
 </button>
-<div class="cookie" hidden role="dialog" aria-label="Kolačići"><strong>Kolačići</strong><span>Demo sajt pamti samo izbor teme i da ste videli ovu poruku, u vašem pregledaču.</span><div class="btn-row"><button class="btn btn-primary btn-sm" type="button" data-cookie-ok>U redu</button></div></div>
+<div class="cookie" hidden role="dialog" aria-label="Kolačići"><strong>Kolačići</strong><span>Sajt ne koristi kolačiće za praćenje. U vašem pregledaču pamti samo izbor teme i da ste videli ovu poruku. <a href="privatnost.html">Više</a></span><div class="btn-row"><button class="btn btn-primary btn-sm" type="button" data-cookie-ok>U redu</button></div></div>
 <div class="palette" hidden role="dialog" aria-modal="true" aria-label="Pretraga sajta">
   <div class="palette-box">
     <div class="palette-search">{SEARCH}<input id="palette-input" type="text" placeholder="Pretražite usluge, pitanja, stranice..." autocomplete="off" aria-controls="palette-list"><span class="kbd">Esc</span></div>
@@ -121,7 +154,7 @@ def footer():
 '''
 
 def page(fname, title, desc, body, nav=None):
-    (OUT / fname).write_text(head(title, desc) + header(nav or fname) + "<main>\n" + body + "\n</main>\n" + footer(), encoding="utf-8")
+    (OUT / fname).write_text(head(title, desc, fname) + header(nav or fname) + "<main>\n" + body + "\n</main>\n" + footer(), encoding="utf-8")
 
 def pagehead(crumb, h1, lead, extra=""):
     return f'''<section class="wrap page-head">
@@ -166,7 +199,7 @@ def calculator():
       <fieldset class="calc-group"><legend>3 · Brzina</legend><div class="seg"><label><input type="radio" name="calc-speed" value="std" checked><span>Standardno</span></label><label><input type="radio" name="calc-speed" value="fast"><span>Hitno, isti dan (+30%)</span></label></div></fieldset>
     </form>
     <div class="calc-out island" aria-live="polite">
-      <div style="display:grid;gap:10px"><span class="eyebrow">Okvirna cena <span class="probno">probno</span></span>
+      <div style="display:grid;gap:10px"><span class="eyebrow">Okvirna cena {P()}</span>
       <div class="calc-price"><span data-calc-price>3.500–4.500</span><small>RSD</small></div></div>
       <div class="calc-lines"><div><span>Rok</span><b data-calc-time>24 h</b></div><div><span>Dijagnostika</span><b>0 RSD uz popravku</b></div><div><span>Garancija</span><b>6 meseci</b></div></div>
       <div class="btn-row"><a class="btn btn-primary" href="kontakt.html#zakazivanje">Zakaži {ARROW}</a><a class="btn btn-ghost" data-calc-link href="ciscenje-i-pasta.html">O usluzi</a></div>
@@ -190,25 +223,34 @@ def compare(cid):
   <div class="handle"></div>
 </div>'''
 
-REVIEWS = [
- ("MJ", "Milica J.", "Vračar", "Laptop se gasio usred rada. Sutradan je bio gotov, tih i hladan. Dobila sam i fotografije pre i posle čišćenja."),
- ("NP", "Nikola P.", "Novi Beograd", "Prosuo sam kafu na tastaturu u ponedeljak. U sredu je laptop radio, a podaci su ostali netaknuti."),
- ("AS", "Ana S.", "Zvezdara", "Jasna procena pre popravke i tačno ta cena na računu. Tako treba da izgleda servis."),
- ("DM", "Dušan M.", "Zemun", "Ugradili su SSD i prebacili ceo sistem. Stari računar se sada pali za desetak sekundi."),
- ("JK", "Jelena K.", "Voždovac", "Za našu kancelariju održavaju 8 računara. Kad nešto stane, dođu isti dan."),
- ("SR", "Stefan R.", "Palilula", "Zamenili su konektor za punjenje umesto cele ploče. Platio sam trećinu cene koju su mi drugde tražili."),
-]
 def reviews():
-    cards = "".join(f'<figure class="review"><blockquote>„{t}“</blockquote><footer><span class="av">{i}</span><div>{n}<span>{loc} · <span class="probno">probna recenzija</span></span></div></footer></figure>' for i, n, loc, t in REVIEWS)
-    return f'''<div class="reviews">
-  <div class="section-head head-split"><div style="display:grid;gap:18px"><p class="eyebrow">Utisci klijenata <span class="probno">probno</span></p><h2 class="split">Šta kažu ljudi kojima smo <span class="serif gold">vratili</span> laptop.</h2></div>
-  <div style="display:grid;gap:16px;justify-items:start"><p class="lead">Primeri recenzija za demo. Na pravom sajtu ovde bi bile stvarne ocene sa Google profila.</p><div class="review-nav"><button class="icon-btn" type="button" data-rev="-1" aria-label="Prethodna recenzija"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M11 6l-6 6 6 6"/></svg></button><button class="icon-btn" type="button" data-rev="1" aria-label="Sledeća recenzija">{ARROW}</button></div></div></div>
+    revs = CFG.get("reviews") or []
+    if not revs: return ""
+    tag = P("probna recenzija")
+    cards = "".join(f'<figure class="review"><blockquote>„{esc(r["text"])}“</blockquote><footer><span class="av">{esc(r.get("initials", ""))}</span><div>{esc(r["name"])}<span>{esc(r.get("place", ""))}{(" · " + tag) if tag else ""}</span></div></footer></figure>' for r in revs)
+    lead = "Primeri recenzija za demo. Na pravom sajtu ovde bi bile stvarne ocene sa Google profila." if DEMO else "Utisci naših klijenata."
+    return f'''<section class="section" style="padding-top:0"><div class="wrap"><div class="reviews">
+  <div class="section-head head-split"><div style="display:grid;gap:18px"><p class="eyebrow">Utisci klijenata {P()}</p><h2 class="split">Šta kažu ljudi kojima smo <span class="serif gold">vratili</span> laptop.</h2></div>
+  <div style="display:grid;gap:16px;justify-items:start"><p class="lead">{lead}</p><div class="review-nav"><button class="icon-btn" type="button" data-rev="-1" aria-label="Prethodna recenzija"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M11 6l-6 6 6 6"/></svg></button><button class="icon-btn" type="button" data-rev="1" aria-label="Sledeća recenzija">{ARROW}</button></div></div></div>
   <div class="review-track" data-reviews tabindex="0" aria-label="Recenzije">{cards}</div>
-</div>'''
+</div></div></section>'''
+
+def trust_row():
+    r = CFG.get("rating")
+    if not r: return ""
+    av = "".join(f"<span>{esc(x.get('initials',''))}</span>" for x in (CFG.get("reviews") or [])[:3])
+    return f'''<div class="trust-row">{f'<span class="avatars" aria-hidden="true">{av}</span>' if av else ""}<span><span class="stars" aria-hidden="true">★★★★★</span> {esc(r["value"])} od 5 · {esc(r["count"])} {P()}</span></div>'''
+
+def stats():
+    st = CFG.get("stats") or []
+    if not st: return ""
+    cells = "".join(f'<div class="stat"><strong><span data-count="{int(x["value"])}">{rsd(int(x["value"]))}</span><small>{esc(x.get("suffix", ""))}</small></strong><span>{esc(x["label"])} {P() if x.get("value") in (2400, 98) else ""}</span></div>' for x in st)
+    return f'''<section class="section-tight"><div class="wrap"><div class="stats">{cells}</div></div></section>'''
 
 def faq_details(items, start=0):
     out = ""
     for j, (q, a) in enumerate(items):
+        if not DEMO: a = a.replace(' <span class="probno">probno</span>', '')
         out += f'<details id="q-{start+j+1}"><summary>{q}</summary><div class="answer"><p>{a}</p></div></details>'
     return out
 
@@ -232,22 +274,19 @@ home = f'''
   <div class="grid-lines" aria-hidden="true"></div>
   <div class="wrap hero-grid">
     <div class="hero-copy">
-      <span class="pill"><span class="dot" data-open-dot></span><b data-open-text>Servis laptopova i računara</b><span>· Beograd</span></span>
+      <span class="pill"><span class="dot" data-open-dot></span><b data-open-text>Servis laptopova i računara</b><span>· {esc(C["city"])}</span></span>
       <h1 class="split">Vaš laptop. <span class="serif gold">Kao nov.</span> Već sutra.</h1>
       <p class="lead">Besplatna dijagnostika, tačna cena pre popravke i 6 meseci garancije. Većinu kvarova rešavamo za 24 do 72 sata, uz test pod opterećenjem pre nego što vam vratimo uređaj.</p>
       <div class="btn-row">
         <a class="btn btn-primary magnetic" href="kontakt.html#zakazivanje">Zakaži servis {ARROW}</a>
         <a class="btn btn-ghost magnetic" href="#kalkulator">Izračunaj cenu</a>
       </div>
-      <div class="trust-row">
-        <span class="avatars" aria-hidden="true"><span>MJ</span><span>NP</span><span>AS</span></span>
-        <span><span class="stars" aria-hidden="true">★★★★★</span> 4,9 od 5 · 2.400+ popravki <span class="probno">probno</span></span>
-      </div>
+      {trust_row()}
     </div>
     <div class="console island" data-tilt>
       <span class="float-chip c2"><span class="dot"></span>Garancija 6 meseci</span>
       <div class="console-inner">
-        <div class="console-top"><div class="lights" aria-hidden="true"><i></i><i></i><i></i></div><span>RN-2026-0417 · dijagnostika uživo</span><span class="probno">demo</span></div>
+        <div class="console-top"><div class="lights" aria-hidden="true"><i></i><i></i><i></i></div><span>Primer dijagnostike uživo</span><span class="probno" style="display:inline-block">ilustracija</span></div>
         <div class="console-chart"><div class="readout"><span>CPU temperatura</span><b data-temp>68 °C</b></div><span class="badge">● Stabilno</span><canvas data-chart role="img" aria-label="Grafikon temperature procesora tokom testa"></canvas></div>
         <div class="checks"><div>Napajanje <b>OK</b></div><div>SSD 512 GB <b>OK</b></div><div>RAM 16 GB <b>OK</b></div><div>Ventilator <b class="run" data-fan>1.850 o/min</b></div></div>
         <div><div class="console-top" style="margin-bottom:8px"><span>Stres test procesora i grafike</span><span data-pct>u toku</span></div><div class="console-bar"><i></i></div></div>
@@ -262,16 +301,7 @@ home = f'''
   <div class="marquee"><div class="marquee-track">{marq}{marq}</div></div>
 </section>
 
-<section class="section-tight">
-  <div class="wrap">
-    <div class="stats">
-      <div class="stat"><strong><span data-count="2400">2.400</span><small>+</small></strong><span>popravljenih uređaja <span class="probno">probno</span></span></div>
-      <div class="stat"><strong><span data-count="24">24</span><small>h</small></strong><span>prosečan rok za čišćenje i sistem</span></div>
-      <div class="stat"><strong><span data-count="6">6</span><small>mes.</small></strong><span>garancija na rad i delove</span></div>
-      <div class="stat"><strong><span data-count="98">98</span><small>%</small></strong><span>popravki bez zamene ploče <span class="probno">probno</span></span></div>
-    </div>
-  </div>
-</section>
+{stats()}
 
 <section class="section">
   <div class="wrap">
@@ -297,7 +327,7 @@ home = f'''
       <h2 class="split">Razlika se <span class="serif gold">vidi</span> i meri.</h2>
       <p class="lead">Povucite klizač. Prašina i osušena pasta mogu da podignu temperaturu procesora i za 25 °C. Posle čišćenja laptop je tiši, hladniji i brži.</p>
       <div class="temp-pair"><div class="hot"><span>Pre čišćenja</span><b>96 °C</b></div><div class="cool"><span>Posle čišćenja</span><b>71 °C</b></div></div>
-      <p class="note">Primer merenja za demo <span class="probno">probno</span></p>
+      <p class="note">Primer merenja. Rezultat zavisi od modela i stanja uređaja.</p>
     </div>
     {compare("cmp-home")}
   </div>
@@ -327,9 +357,7 @@ home = f'''
   </div>
 </section>
 
-<section class="section" style="padding-top:0">
-  <div class="wrap">{reviews()}</div>
-</section>
+{reviews()}
 
 <section class="section" style="padding-top:0">
   <div class="wrap">
@@ -342,7 +370,7 @@ home = f'''
 </section>
 {cta()}
 '''
-page("index.html", "Reset servis", "Demo sajt servisa laptopova i računara u Beogradu.", home)
+page("index.html", BIZ["name"], f"Servis laptopova i računara, {C['city']}: dijagnostika, popravka, čišćenje i nadogradnja.", home)
 
 # ================= USLUGE =================
 cards = "\n".join(svc_card(s) for s in SERVICES)
@@ -364,7 +392,7 @@ usl = pagehead("Usluge i cene", 'Usluge i <span class="serif gold">cene</span>',
 </section>
 <section class="section" style="padding-top:0">
   <div class="wrap">
-    <div class="section-head"><p class="eyebrow">Cenovnik <span class="probno">probne cene</span></p><h2 class="split">Kompletan cenovnik</h2><p class="lead">Cene su u dinarima sa PDV-om. Delovi se uvek prvo odobravaju sa vama.</p></div>
+    <div class="section-head"><p class="eyebrow">Cenovnik {P("probne cene")}</p><h2 class="split">Kompletan cenovnik</h2><p class="lead">Cene su u dinarima sa PDV-om. Delovi se uvek prvo odobravaju sa vama.</p></div>
     <div class="table-wrap"><table><thead><tr><th>Usluga</th><th>Raspon cene</th><th>Rok</th></tr></thead><tbody>
 {rows}</tbody></table></div>
     <p class="note">Sve cene na ovom demo sajtu su izmišljene i služe samo za prikaz.</p>
@@ -372,7 +400,7 @@ usl = pagehead("Usluge i cene", 'Usluge i <span class="serif gold">cene</span>',
 </section>
 {cta("Ne vidite svoj kvar na listi?", "Opišite problem, pa ćemo vam reći da li ga popravljamo i koliko bi okvirno koštalo.", "Pošalji upit")}
 '''
-page("usluge.html", "Usluge i cene · Reset servis", "Usluge servisa laptopova i računara i okvirne cene.", usl)
+page("usluge.html", "Usluge i cene · " + BIZ["name"], "Usluge servisa laptopova i računara i okvirne cene.", usl)
 
 # ================= STRANICE USLUGA =================
 def nice_step(mx):
@@ -394,10 +422,10 @@ for s in SERVICES:
     inc = "".join(f"<li>{x}</li>" for x in s["included"])
     extra = ""
     if s["slug"] == "ciscenje-i-pasta":
-        extra += f'''<section class="section" style="padding-top:0"><div class="wrap compare-wrap"><div style="display:grid;gap:22px"><p class="eyebrow">Pre i posle <span class="probno">probno</span></p><h2 class="split">Povucite i <span class="serif gold">uporedite.</span></h2><p class="lead">Isti ventilator pre i posle čišćenja. Temperatura procesora pod opterećenjem pala je sa 96 na 71 °C.</p></div>{compare("cmp-svc")}</div></section>'''
+        extra += f'''<section class="section" style="padding-top:0"><div class="wrap compare-wrap"><div style="display:grid;gap:22px"><p class="eyebrow">Pre i posle {P()}</p><h2 class="split">Povucite i <span class="serif gold">uporedite.</span></h2><p class="lead">Isti ventilator pre i posle čišćenja. Temperatura procesora pod opterećenjem pala je sa 96 na 71 °C.</p></div>{compare("cmp-svc")}</div></section>'''
     elif s.get("ba"):
         label, unit, b, a, scale = s["ba"]
-        extra += f'''<section class="section" style="padding-top:0"><div class="wrap"><div class="section-head"><p class="eyebrow">Primer rezultata <span class="probno">probno</span></p><h2 class="split">{label}</h2></div><div class="ba"><div class="ba-row"><span>Pre</span><div class="ba-bar"><i class="before" style="width:{b/scale*100:.1f}%"></i></div><b>{b} {unit}</b></div><div class="ba-row"><span>Posle</span><div class="ba-bar"><i class="after" style="width:{a/scale*100:.1f}%"></i></div><b>{a} {unit}</b></div><p class="note">Izmišljeno merenje za demo. Stvarni rezultat zavisi od modela i stanja uređaja.</p></div></div></section>'''
+        extra += f'''<section class="section" style="padding-top:0"><div class="wrap"><div class="section-head"><p class="eyebrow">Primer rezultata {P()}</p><h2 class="split">{label}</h2></div><div class="ba"><div class="ba-row"><span>Pre</span><div class="ba-bar"><i class="before" style="width:{b/scale*100:.1f}%"></i></div><b>{b} {unit}</b></div><div class="ba-row"><span>Posle</span><div class="ba-bar"><i class="after" style="width:{a/scale*100:.1f}%"></i></div><b>{a} {unit}</b></div><p class="note">Izmišljeno merenje za demo. Stvarni rezultat zavisi od modela i stanja uređaja.</p></div></div></section>'''
     if s.get("tip"):
         tips = "".join(f"<li>{x}</li>" for x in s["tip"])
         extra += f'<section class="section" style="padding-top:0"><div class="wrap"><div class="tip"><p class="eyebrow">Hitno</p><h2>Prva pomoć: šta da uradite odmah</h2><ul class="check-list warn">{tips}</ul></div></div></section>'
@@ -410,7 +438,7 @@ for s in SERVICES:
       <p class="crumbs"><a href="index.html">Početna</a> / <a href="usluge.html">Usluge</a> / {s["title"]}</p>
       <h1 class="split">{s["title"]}</h1>
       <p class="lead">{s["long"]}</p>
-      <div class="svc-facts"><span class="chip">Cena <b>{rsd(low(s))}–{rsd(high(s))} RSD</b> <span class="probno">probno</span></span><span class="chip">Rok <b>{s["time"]}</b></span><span class="chip">Garancija <b>6 meseci</b></span></div>
+      <div class="svc-facts"><span class="chip">Cena <b>{rsd(low(s))}–{rsd(high(s))} RSD</b> {P()}</span><span class="chip">Rok <b>{s["time"]}</b></span><span class="chip">Garancija <b>6 meseci</b></span></div>
       <div class="btn-row"><a class="btn btn-primary magnetic" href="kontakt.html#zakazivanje">Zakaži servis {ARROW}</a><a class="btn btn-ghost" href="#cene">Pogledaj cene</a></div>
     </div>
     <div class="illus-panel" data-tilt>{SVC_ILLUS[s["icon"]]}</div>
@@ -424,7 +452,7 @@ for s in SERVICES:
 </section>
 <section class="section" style="padding-top:0" id="cene">
   <div class="wrap">
-    <div class="section-head head-split"><div style="display:grid;gap:18px"><p class="eyebrow">Raspon cena <span class="probno">probne cene</span></p><h2 class="split">Koliko <span class="serif gold">košta</span></h2></div><p class="lead">Svaka traka pokazuje od koliko do koliko obično košta ta popravka. Tačnu cenu dobijate posle besplatne dijagnostike.</p></div>
+    <div class="section-head head-split"><div style="display:grid;gap:18px"><p class="eyebrow">Raspon cena {P("probne cene")}</p><h2 class="split">Koliko <span class="serif gold">košta</span></h2></div><p class="lead">Svaka traka pokazuje od koliko do koliko obično košta ta popravka. Tačnu cenu dobijate posle besplatne dijagnostike.</p></div>
     {range_chart(s["prices"])}
     <p class="note">Cene su u dinarima sa PDV-om i izmišljene su za potrebe demo sajta.</p>
   </div>
@@ -440,7 +468,7 @@ for s in SERVICES:
 </section>
 {cta()}
 '''
-    page(href(s), f'{s["title"]} · Reset servis', s["short"], body, nav="usluge.html")
+    page(href(s), f'{s["title"]} · {BIZ["name"]}', s["short"], body, nav="usluge.html")
 
 # ================= POSTUPAK =================
 st = ""
@@ -470,7 +498,7 @@ post = pagehead("Postupak", 'Postupak <span class="serif gold">servisiranja</spa
 </section>
 {cta()}
 '''
-page("postupak.html", "Postupak servisiranja · Reset servis", "Kako izgleda servisiranje laptopa i računara, faza po faza.", post)
+page("postupak.html", "Postupak servisiranja · " + BIZ["name"], "Kako izgleda servisiranje laptopa i računara, faza po faza.", post)
 
 # ================= PITANJA =================
 fq = ""; n = 0
@@ -487,91 +515,115 @@ pit = pagehead("Česta pitanja", 'Česta <span class="serif gold">pitanja</span>
 </section>
 {cta("Imate drugo pitanje?", "Pozovite nas ili pošaljite poruku. Odgovaramo istog radnog dana.", "Kontaktirajte nas")}
 '''
-page("pitanja.html", "Česta pitanja · Reset servis", "Odgovori na najčešća pitanja o servisu laptopova i računara.", pit)
+page("pitanja.html", "Česta pitanja · " + BIZ["name"], "Odgovori na najčešća pitanja o servisu laptopova i računara.", pit)
 
 # ================= KONTAKT =================
 DEV_ICONS = [ICONS["laptop"], ICONS["bolt"], ICONS["laptop"], ICONS["pc"]]
 devs = "".join(f'<label class="choice"><input type="radio" name="wz-dev" value="{l}"{" checked" if i == 0 else ""}><span>{DEV_ICONS[i]}{l}</span></label>' for i, (_, l, _) in enumerate(CALC_DEVICES))
 probs = "".join(f'<label><input type="checkbox" name="wz-prob" value="{p}"><span>{p}</span></label>' for p in ["Ne pali se", "Greje se / buka", "Ekran", "Tastatura", "Prosuta tečnost", "Spor sistem", "Punjenje", "Drugo"])
-times = "".join(f'<label><input type="radio" name="wz-time" value="{t}"{" checked" if t == "10:00" else ""}><span>{t}</span></label>' for t in ["09:00", "10:00", "11:30", "13:00", "15:00", "17:30"])
-kon = pagehead("Kontakt", 'Zakažite. <span class="serif gold">Mi brinemo o ostalom.</span>', "Donesite uređaj bez zakazivanja ili rezervišite termin u četiri kratka koraka.", '<span class="pill" style="justify-self:start"><span class="dot" data-open-dot></span><b data-open-text>Pon–Pet 09–19 h</b></span>') + f'''
+hours_rows = f'<span data-day="1">Ponedeljak–petak</span><span data-day="1">{hrs(H["weekdays"])}</span><span data-day="6">Subota</span><span data-day="6">{hrs(H["saturday"])}</span><span data-day="0">Nedelja</span><span data-day="0">{hrs(H["sunday"])}</span>'
+mobile_row = f'<li><span class="label">Viber / WhatsApp {P()}</span><span class="value">{esc(C["mobile"])} <button class="copy-btn" type="button" data-copy="{tel(C["mobile"])}">Kopiraj</button></span></li>' if C.get("mobile") else ""
+kon = pagehead("Kontakt", 'Zakažite. <span class="serif gold">Mi brinemo o ostalom.</span>', "Donesite uređaj bez zakazivanja ili rezervišite termin u četiri kratka koraka.", f'<span class="pill" style="justify-self:start"><span class="dot" data-open-dot></span><b data-open-text>Pon–Pet {hshort(H["weekdays"])}</b></span>') + f'''
 <section class="section-tight">
   <div class="wrap contact-grid">
     <div style="display:grid;gap:28px;align-content:start;min-width:0">
       <ul class="info-list">
-        <li><span class="label">Adresa <span class="probno">probno</span></span><span class="value">Bulevar kralja Aleksandra 000, 11000 Beograd</span></li>
-        <li><span class="label">Telefon <span class="probno">probno</span></span><span class="value">+381 11 000 0000 <button class="copy-btn" type="button" data-copy="+381110000000">Kopiraj</button></span></li>
-        <li><span class="label">Viber / WhatsApp <span class="probno">probno</span></span><span class="value">+381 60 000 0000</span></li>
-        <li><span class="label">E-pošta <span class="probno">probno</span></span><span class="value">servis@primer.rs <button class="copy-btn" type="button" data-copy="servis@primer.rs">Kopiraj</button></span></li>
-        <li><span class="label">Radno vreme <span class="probno">probno</span></span><div class="hours" data-hours><span data-day="1">Ponedeljak–petak</span><span data-day="1">09:00–19:00</span><span data-day="6">Subota</span><span data-day="6">10:00–15:00</span><span data-day="0">Nedelja</span><span data-day="0">zatvoreno</span></div></li>
+        <li><span class="label">Adresa {P()}</span><span class="value">{esc(ADDRESS)}</span></li>
+        <li><span class="label">Telefon {P()}</span><span class="value"><a href="tel:{tel(C["phone"])}">{esc(C["phone"])}</a> <button class="copy-btn" type="button" data-copy="{tel(C["phone"])}">Kopiraj</button></span></li>
+        {mobile_row}
+        <li><span class="label">E-pošta {P()}</span><span class="value"><a href="mailto:{esc(C["email"])}">{esc(C["email"])}</a> <button class="copy-btn" type="button" data-copy="{esc(C["email"])}">Kopiraj</button></span></li>
+        <li><span class="label">Radno vreme {P()}</span><div class="hours" data-hours>{hours_rows}</div></li>
       </ul>
-      <div class="map-box"><div class="map-art">{MAP_ART}</div><strong>Kako do nas</strong><p style="color:var(--muted)">Primer lokacije: blizu Vukovog spomenika, linije 7, 12 i 14. Parking u okolnim ulicama (zona 2).</p><a class="link-arrow" href="https://www.openstreetmap.org/#map=15/44.8040/20.4790" target="_blank" rel="noopener">Otvori mapu Beograda {ARROW}</a></div>
+      <div class="map-box"><div class="map-art">{MAP_ART}</div><strong>Kako do nas</strong><p style="color:var(--muted)">{esc(C["directions"])}</p><a class="link-arrow" href="{esc(C["mapUrl"])}" target="_blank" rel="noopener">Otvori mapu {ARROW}</a></div>
     </div>
     <form class="wizard" id="zakazivanje" data-wizard novalidate>
       <div class="wz-head"><h2 style="font-size:clamp(1.5rem,2.6vw,2rem)">Zakažite servis</h2><span data-wz-label>Korak 1 od 4</span></div>
       <div class="wz-progress" aria-hidden="true"><i class="on"></i><i></i><i></i><i></i></div>
-      <div class="wz-step" data-step="1"><p class="lead">Koji uređaj donosite?</p><div class="choice-grid">{devs}</div><div class="field"><label for="wz-model">Proizvođač i model (ako znate)</label><input id="wz-model" placeholder="npr. Lenovo IdeaPad 5"></div></div>
-      <div class="wz-step" data-step="2" hidden><p class="lead">Šta se dešava? Izaberite sve što važi.</p><div class="seg">{probs}</div><div class="field"><label for="wz-opis">Kratak opis</label><textarea id="wz-opis" placeholder="Od kada, da li je bilo pada ili prosute tečnosti..."></textarea></div></div>
-      <div class="wz-step" data-step="3" hidden><p class="lead">Kada vam odgovara da donesete uređaj?</p><div class="seg" data-days></div><div class="seg">{times}</div><p class="note">Termini su primer za demo. Možete doći i bez zakazivanja.</p></div>
-      <div class="wz-step" data-step="4" hidden><p class="lead">Kako da vas kontaktiramo?</p><div class="field-row"><div class="field"><label for="wz-ime">Ime i prezime</label><input id="wz-ime" autocomplete="name" placeholder="Petar Petrović"></div><div class="field"><label for="wz-tel">Telefon</label><input id="wz-tel" type="tel" autocomplete="tel" placeholder="06x xxx xxxx"></div></div><p class="form-err" data-wz-err hidden>Upišite ime i telefon da bismo mogli da potvrdimo termin.</p><div class="summary-list" data-wz-summary></div></div>
-      <div class="wz-step" data-step="5" hidden tabindex="-1"><p class="eyebrow">Demo</p><h3 style="font-size:1.6rem">Hvala! Ovo je bio prikaz zakazivanja.</h3><p class="form-msg">Zahtev nije poslat jer je ovo demo sajt. Na pravom sajtu ovde bi stigla potvrda termina i broj radnog naloga, na primer RN-2026-0471.</p><div class="summary-list" data-wz-summary2></div></div>
+      <div class="wz-step" data-step="1"><p class="lead">Koji uređaj donosite?</p><div class="choice-grid">{devs}</div><div class="field"><label for="wz-model">Proizvođač i model (ako znate)</label><input id="wz-model" maxlength="120" placeholder="npr. Lenovo IdeaPad 5"></div></div>
+      <div class="wz-step" data-step="2" hidden><p class="lead">Šta se dešava? Izaberite sve što važi.</p><div class="seg">{probs}</div><div class="field"><label for="wz-opis">Kratak opis</label><textarea id="wz-opis" maxlength="2000" placeholder="Od kada, da li je bilo pada ili prosute tečnosti..."></textarea></div></div>
+      <div class="wz-step" data-step="3" hidden><p class="lead">Kada vam odgovara da donesete uređaj?</p><div class="seg" data-days></div><div class="seg" data-times></div><p class="note">Termin potvrđujemo pozivom ili porukom. Možete doći i bez zakazivanja.</p></div>
+      <div class="wz-step" data-step="4" hidden><p class="lead">Kako da vas kontaktiramo?</p>
+        <div class="field-row"><div class="field"><label for="wz-ime">Ime i prezime</label><input id="wz-ime" maxlength="100" autocomplete="name" placeholder="Petar Petrović"></div><div class="field"><label for="wz-tel">Telefon</label><input id="wz-tel" maxlength="30" type="tel" autocomplete="tel" placeholder="06x xxx xxxx"></div></div>
+        <div class="field"><label for="wz-email">E-pošta (nije obavezno)</label><input id="wz-email" maxlength="150" type="email" autocomplete="email" placeholder="vasa@adresa.rs"></div>
+        <div class="field" aria-hidden="true" style="position:absolute;left:-9999px"><label for="wz-web">Ne popunjavajte</label><input id="wz-web" tabindex="-1" autocomplete="off"></div>
+        <label class="consent"><input type="checkbox" id="wz-consent"> <span>Saglasan/na sam da {esc(BIZ["name"])} koristi ove podatke da me kontaktira u vezi sa servisom. <a href="privatnost.html" target="_blank">Politika privatnosti</a></span></label>
+        <p class="form-err" data-wz-err hidden></p><div class="summary-list" data-wz-summary></div></div>
+      <div class="wz-step" data-step="5" hidden tabindex="-1" data-wz-done></div>
       <div class="wz-nav"><button class="btn btn-ghost" type="button" data-wz-prev hidden>Nazad</button><button class="btn btn-primary magnetic" type="button" data-wz-next style="margin-left:auto">Dalje {ARROW}</button></div>
     </form>
   </div>
 </section>
 '''
-page("kontakt.html", "Kontakt · Reset servis", "Adresa, telefon, radno vreme i zakazivanje servisa.", kon)
+page("kontakt.html", f"Kontakt · {BIZ['name']}", "Adresa, telefon, radno vreme i zakazivanje servisa.", kon)
 
 # ================= STATUS =================
-STAGES = ["Primljen u servis", "Dijagnostika", "Procena poslata", "Vi ste odobrili", "U popravci", "Testiranje", "Spreman za preuzimanje"]
-ORDERS = {
- "RN-2026-0417": dict(device="Lenovo IdeaPad 5, 15,6\"", issue="Gasi se pri opterećenju", diag="Pregrevanje, osušena termalna pasta", price="3.500 RSD", eta="Danas do 17:00", done=4,
-   times=["Pon 09:42", "Pon 13:10", "Pon 13:25", "Pon 14:02", "Uto 10:15", "", ""]),
- "RN-2026-0388": dict(device="MacBook Air 13\"", issue="Baterija traje 40 minuta", diag="Istrošena baterija, 1.100 ciklusa", price="9.800 RSD", eta="Spreman, čeka vas", done=7,
-   times=["Čet 11:05", "Čet 15:30", "Čet 15:41", "Pet 09:12", "Pet 10:00", "Pet 12:30", "Pet 15:45"]),
- "RN-2026-0452": dict(device="ASUS TUF Gaming F15", issue="Ne pali se", diag="Neispravan konektor za punjenje", price="7.900 RSD", eta="2 dana od odobrenja", done=2,
-   times=["Uto 16:20", "Sre 11:40", "Sre 12:05", "", "", "", ""]),
-}
-def order_html(code):
-    o = ORDERS[code]; done = o["done"]
-    status = STAGES[min(done, 6)] if done < 7 else STAGES[6]
-    tl = ""
-    for i, sname in enumerate(STAGES):
-        cls = "done" if i < done else ("now" if i == done else "")
-        if done == 7 and i == 6: cls = "done"
-        tl += f'<li class="{cls}"><span></span><span>{sname}</span><time>{o["times"][i] or "—"}</time></li>'
-    label = "Spreman za preuzimanje" if done == 7 else ("Čeka vaše odobrenje" if done == 3 or done == 2 else STAGES[done])
-    return f'''<div class="tr-top"><div style="display:grid;gap:8px"><span class="eyebrow">{code} <span class="probno">demo</span></span><h2>{label}</h2></div><span class="badge">● {o["eta"]}</span></div>
-<div class="tr-meta"><div><span>Uređaj</span><b>{o["device"]}</b></div><div><span>Prijavljen kvar</span><b>{o["issue"]}</b></div><div><span>Dijagnoza</span><b>{o["diag"]}</b></div><div><span>Cena</span><b>{o["price"]}</b></div></div>
-<ol class="tl">{tl}</ol>'''
-codes = "".join(f'<button type="button" data-code="{c}">{c}</button>' for c in ORDERS)
-sta = pagehead("Status popravke", 'Gde je moj <span class="serif gold">laptop?</span>', "Upišite broj radnog naloga sa potvrde koju ste dobili pri predaji uređaja.") + f'''
+STAGES = ["Primljen u servis", "Dijagnostika", "Procena poslata", "Vi ste odobrili", "U popravci", "Testiranje", "Spreman za preuzimanje", "Preuzet"]
+DEMO_ORDERS = {
+ "RN-2026-0417": dict(device="Lenovo IdeaPad 5, 15,6\"", issue="Gasi se pri opterećenju", diag="Pregrevanje, osušena termalna pasta", price="3.500 RSD", eta="Danas do 17:00", stage=4,
+   times=["Pon 09:42", "Pon 13:10", "Pon 13:25", "Pon 14:02", "Uto 10:15", "", "", ""]),
+ "RN-2026-0388": dict(device="MacBook Air 13\"", issue="Baterija traje 40 minuta", diag="Istrošena baterija, 1.100 ciklusa", price="9.800 RSD", eta="Spreman, čeka vas", stage=6,
+   times=["Čet 11:05", "Čet 15:30", "Čet 15:41", "Pet 09:12", "Pet 10:00", "Pet 12:30", "Pet 15:45", ""]),
+ "RN-2026-0452": dict(device="ASUS TUF Gaming F15", issue="Ne pali se", diag="Neispravan konektor za punjenje", price="7.900 RSD", eta="2 dana od odobrenja", stage=2,
+   times=["Uto 16:20", "Sre 11:40", "Sre 12:05", "", "", "", "", ""]),
+} if DEMO else {}
+codes = "".join(f'<button type="button" data-code="{c}">{c}</button>' for c in DEMO_ORDERS)
+demo_codes = f'<p class="note" style="margin:0">Primeri za demo:</p><div class="demo-codes">{codes}</div>' if DEMO else ""
+sta = pagehead("Status popravke", 'Gde je moj <span class="serif gold">laptop?</span>', "Upišite broj radnog naloga sa potvrde koju ste dobili pri predaji uređaja ili posle zakazivanja.") + f'''
 <section class="section-tight">
   <div class="wrap tracker">
     <form class="track-form" data-track novalidate>
       <label for="track-code">Broj radnog naloga</label>
-      <div class="track-row"><input id="track-code" value="RN-2026-0417" placeholder="RN-2026-0000" autocomplete="off"><button class="btn btn-primary" type="submit">Proveri {ARROW}</button></div>
-      <p class="form-err" data-track-err hidden>Nalog sa tim brojem nije pronađen. Proverite broj ili probajte neki od primera ispod.</p>
-      <p class="note" style="margin:0">Primeri za demo:</p>
-      <div class="demo-codes">{codes}</div>
+      <div class="track-row"><input id="track-code" value="{"RN-2026-0417" if DEMO else ""}" placeholder="npr. RN-2026-7KQ4M" autocomplete="off" maxlength="20"><button class="btn btn-primary" type="submit">Proveri {ARROW}</button></div>
+      <p class="form-err" data-track-err hidden></p>
+      {demo_codes}
     </form>
-    <div class="track-result" data-track-result aria-live="polite">{order_html("RN-2026-0417")}</div>
+    <div class="track-result" data-track-result aria-live="polite"><div class="tr-top"><div style="display:grid;gap:8px"><span class="eyebrow">Status</span><h2>Upišite broj naloga</h2></div></div><p class="lead">Broj naloga je na potvrdi koju ste dobili pri predaji uređaja. Ako ga nemate, pozovite nas na {esc(C["phone"])}.</p></div>
   </div>
 </section>
 {cta("Uređaj još nije kod nas?", "Zakažite termin ili ga donesite bez zakazivanja. Broj naloga dobijate odmah pri predaji.", "Zakaži servis")}
 '''
-page("status.html", "Status popravke · Reset servis", "Praćenje statusa popravke po broju radnog naloga.", sta)
+page("status.html", f"Status popravke · {BIZ['name']}", "Praćenje statusa popravke po broju radnog naloga.", sta)
+
+# ================= PRIVATNOST =================
+priv = pagehead("Politika privatnosti", 'Politika <span class="serif gold">privatnosti</span>', f"Kako {esc(BIZ['name'])} prikuplja i koristi vaše podatke.") + f'''
+<section class="section-tight"><div class="wrap" style="max-width:52rem"><div class="list-box legal">
+  {'<p class="form-err">Ovo je šablon. Pre objavljivanja ga proverite i dopunite podacima o firmi (ili sa pravnikom).</p>' if DEMO else ''}
+  <h2>Rukovalac podacima</h2><p>{esc(BIZ["legalName"] or BIZ["name"])}, {esc(ADDRESS)}{(", PIB " + esc(BIZ["pib"])) if BIZ.get("pib") else ""}{(", MB " + esc(BIZ["maticniBroj"])) if BIZ.get("maticniBroj") else ""}. Kontakt: {esc(C["email"])}, {esc(C["phone"])}.</p>
+  <h2>Koje podatke prikupljamo</h2><p>Kada zakažete servis: ime i prezime, telefon, e-poštu (ako je navedete), opis uređaja i kvara i željeni termin. Kada se prijavite za savete: adresu e-pošte. Ne prikupljamo podatke o plaćanju preko sajta.</p>
+  <h2>Svrha i pravni osnov</h2><p>Podatke koristimo samo da bismo vas kontaktirali u vezi sa servisom, vodili radni nalog i prikazali status popravke. Osnov je vaš pristanak i izvršenje ugovora o servisu, u skladu sa Zakonom o zaštiti podataka o ličnosti Republike Srbije.</p>
+  <h2>Koliko čuvamo podatke</h2><p>Podatke o radnim nalozima čuvamo dok traje garantni rok i koliko propisi o računovodstvu zahtevaju. Adresu za savete čuvamo dok se ne odjavite.</p>
+  <h2>Vaša prava</h2><p>Imate pravo na pristup, ispravku i brisanje podataka, kao i na povlačenje pristanka. Pišite nam na {esc(C["email"])}. Pritužbu možete podneti Povereniku za informacije od javnog značaja i zaštitu podataka o ličnosti.</p>
+  <h2>Kolačići</h2><p>Sajt ne koristi kolačiće za praćenje ni oglase. U vašem pregledaču čuva samo izbor teme i podatak da ste videli obaveštenje.</p>
+  <h2>Status popravke</h2><p>Na stranici „Status popravke“ po broju naloga prikazujemo samo uređaj, kvar, cenu i fazu popravke, nikada vaše ime i kontakt.</p>
+</div></div></section>
+'''
+page("privatnost.html", f"Politika privatnosti · {BIZ['name']}", "Kako prikupljamo i koristimo podatke.", priv)
+
+# ================= 404 =================
+nf = pagehead("Stranica nije pronađena", 'Ova stranica <span class="serif gold">ne postoji.</span>', "Možda je link pogrešan ili je stranica premeštena.", f'<div class="btn-row"><a class="btn btn-primary" href="index.html">Na početnu {ARROW}</a><a class="btn btn-ghost" href="usluge.html">Usluge</a></div>')
+page("404.html", f"Stranica nije pronađena · {BIZ['name']}", "Stranica nije pronađena.", nf)
+
+# ================= SEO DATOTEKE =================
+pages_for_map = ["index.html", "usluge.html", "postupak.html", "status.html", "pitanja.html", "kontakt.html", "privatnost.html"] + [href(s) for s in SERVICES]
+base = CFG["siteUrl"].rstrip("/")
+(OUT / "sitemap.xml").write_text('<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' + "".join(f"  <url><loc>{base}/{'' if f == 'index.html' else f}</loc></url>\n" for f in pages_for_map) + "</urlset>\n", encoding="utf-8")
+(OUT / "robots.txt").write_text(("User-agent: *\nDisallow: /\n" if DEMO else f"User-agent: *\nDisallow: /admin\nDisallow: /api/\nSitemap: {base}/sitemap.xml\n"), encoding="utf-8")
 
 # ================= PODACI ZA JS =================
-search = [{"t": "Početna", "d": "Reset servis, Beograd", "u": "index.html", "k": "Stranica"}]
+search = [{"t": "Početna", "d": f"{BIZ['name']}, {C['city']}", "u": "index.html", "k": "Stranica"}]
 search += [{"t": l, "d": "", "u": h, "k": "Stranica"} for h, l in NAV]
 search += [{"t": s["title"], "d": s["short"], "u": href(s), "k": "Usluga"} for s in SERVICES]
 search += [{"t": q, "d": a.split("<")[0][:90], "u": f"pitanja.html#q-{i+1}", "k": "Pitanje"} for i, (q, a) in enumerate(all_q)]
 search += [{"t": h, "d": d[:90], "u": f"postupak.html#korak-{i+1}", "k": "Postupak"} for i, (h, _, _, d, _) in enumerate(STEPS)]
 site = {
+  "demo": DEMO,
+  "phone": C["phone"],
+  "biz": {"name": BIZ["name"], "legalName": BIZ["legalName"], "address": ADDRESS, "phone": C["phone"], "email": C["email"]},
+  "hours": {"1": H["weekdays"], "2": H["weekdays"], "3": H["weekdays"], "4": H["weekdays"], "5": H["weekdays"], "6": H["saturday"], "0": H["sunday"]},
+  "stages": STAGES,
   "search": search,
   "calc": {"devices": {k: m for k, _, m in CALC_DEVICES}, "issues": {k: [lo, hi, t, href(BY_SLUG[sl])] for k, _, lo, hi, t, sl in CALC_ISSUES}},
-  "orders": {c: order_html(c) for c in ORDERS},
+  "demoOrders": DEMO_ORDERS,
 }
 (OUT / "assets" / "site-data.js").write_text("window.RS = " + json.dumps(site, ensure_ascii=False) + ";\n", encoding="utf-8")
 print("ok")

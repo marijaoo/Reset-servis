@@ -689,3 +689,15 @@ textarea { min-height: 130px; resize: vertical; }
 [id] { scroll-margin-top: 92px; }
 /* Na telefonu je zakazivanje prvo na stranici Kontakt */
 @media (max-width: 959px) { .contact-grid .wizard { order: -1; } }
+
+/* Saglasnost i pravni tekst */
+.consent { display: grid; grid-template-columns: 22px 1fr; gap: 10px; align-items: start; font-weight: 400; font-size: .9rem; color: var(--muted); cursor: pointer; }
+.consent input { width: 20px; height: 20px; margin: 2px 0 0; padding: 0; accent-color: var(--accent); }
+.consent a { color: var(--accent); }
+.legal h2 { font-size: 1.25rem; margin-top: 8px; }
+.legal p { color: var(--muted); }
+.info-list .value a { color: inherit; text-decoration: none; }
+.info-list .value a:hover { color: var(--accent); }
+.footer-bottom a { color: inherit; }
+.wz-code { font: 500 clamp(1.6rem, 4vw, 2.2rem)/1 var(--font-mono); letter-spacing: .04em; color: var(--accent); }
+.btn[disabled] { opacity: .6; pointer-events: none; }

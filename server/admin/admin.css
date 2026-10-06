@@ -1,0 +1,46 @@
+/* Panel: koristi tokene iz glavnog sajta */
+body.adm { padding-bottom: 0; }
+body.adm::after { display: none; }
+.adm-login { min-height: 100vh; display: grid; place-items: center; padding: 24px 16px; }
+.adm-login .wizard { width: min(420px, 100%); }
+.adm-top { position: sticky; top: 0; z-index: 10; display: flex; flex-wrap: wrap; gap: 12px 20px; align-items: center; padding: 12px 16px; background: var(--glass); backdrop-filter: blur(14px); border-bottom: 1px solid var(--line); }
+.adm-tabs { display: flex; gap: 4px; }
+.adm-tabs button { font: 500 .95rem var(--font-body); padding: 8px 14px; border-radius: 999px; border: 1px solid transparent; background: none; color: var(--muted); cursor: pointer; }
+.adm-tabs button[aria-selected="true"] { color: var(--ink); background: var(--surface); border-color: var(--line-2); }
+.adm-actions { margin-left: auto; display: flex; flex-wrap: wrap; gap: 8px; }
+.adm-main { padding: 20px 16px 40px; max-width: 1400px; margin-inline: auto; }
+.adm-filters { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; margin-bottom: 16px; }
+.adm-filters input[type=search] { flex: 1 1 260px; border-radius: 999px; }
+.adm-grid { display: grid; gap: 16px; align-items: start; }
+@media (min-width: 1000px) { .adm-grid { grid-template-columns: minmax(0, 1fr) minmax(0, 560px); } .adm-detail { position: sticky; top: 76px; max-height: calc(100vh - 92px); overflow-y: auto; } }
+.adm-list { display: grid; gap: 8px; min-width: 0; }
+.adm-row { display: grid; grid-template-columns: 1fr auto; gap: 4px 12px; text-align: left; width: 100%; padding: 14px 16px; border-radius: 14px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); cursor: pointer; font: inherit; box-shadow: var(--card-shadow); }
+.adm-row:hover, .adm-row.sel { border-color: var(--accent); }
+.adm-row b { font-family: var(--font-mono); font-weight: 500; }
+.adm-row small { color: var(--muted); grid-column: 1; }
+.adm-row .pill-st { grid-row: 1 / span 2; grid-column: 2; align-self: center; }
+.pill-st { font: 500 .72rem/1 var(--font-mono); padding: 6px 9px; border-radius: 999px; white-space: nowrap; background: color-mix(in srgb, var(--accent) 14%, transparent); color: var(--accent); }
+.pill-st.s-1 { background: color-mix(in srgb, var(--signal) 18%, transparent); color: var(--signal); }
+.pill-st.s6 { background: color-mix(in srgb, var(--ok) 18%, transparent); color: var(--ok); }
+.pill-st.s7 { background: var(--bg-2); color: var(--muted); }
+.adm-empty { padding: 32px; text-align: center; color: var(--muted); border: 1px dashed var(--line-2); border-radius: 14px; }
+.adm-detail fieldset { border: 0; padding: 0; margin: 0; display: grid; gap: 12px; }
+.adm-detail legend { font: 500 .72rem var(--font-mono); letter-spacing: .12em; text-transform: uppercase; color: var(--muted); margin-bottom: 10px; }
+.adm-stages { display: flex; flex-wrap: wrap; gap: 6px; }
+.adm-stages button { font: 500 .8rem var(--font-body); padding: 8px 11px; border-radius: 999px; border: 1px solid var(--line-2); background: var(--bg-2); color: var(--muted); cursor: pointer; }
+.adm-stages button.on { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+.adm-stages button.past { color: var(--ink); }
+.adm-danger { color: var(--danger) !important; }
+.adm-danger-solid { background: var(--danger); color: #fff; border: 0; }
+.adm-confirm { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; padding: 12px 14px; border-radius: 12px; border: 1px solid color-mix(in srgb, var(--danger) 40%, transparent); background: color-mix(in srgb, var(--danger) 8%, transparent); }
+.adm-print { display: none; }
+@media print {
+  body.adm > *:not(.adm-print) { display: none !important; }
+  .adm-print { display: block; color: #000; background: #fff; font: 12pt/1.5 system-ui, sans-serif; padding: 0; }
+  .adm-print h1 { font-size: 18pt; margin: 0 0 4pt; }
+  .adm-print .code { font: 700 22pt monospace; margin: 12pt 0; }
+  .adm-print table { width: 100%; border-collapse: collapse; min-width: 0; }
+  .adm-print td { border-bottom: 1px solid #ccc; padding: 5pt 0; vertical-align: top; }
+  .adm-print td:first-child { width: 35%; color: #444; }
+  .adm-print .sign { margin-top: 36pt; display: flex; justify-content: space-between; }
+}

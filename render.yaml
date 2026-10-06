@@ -1,0 +1,24 @@
+# Render.com Blueprint: New > Blueprint > izaberite ovaj repozitorijum.
+services:
+  - type: web
+    name: reset-servis
+    runtime: node
+    plan: starter          # disk za bazu zahteva plaćeni plan; besplatan plan briše podatke pri restartu
+    buildCommand: "true"
+    startCommand: npm start
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_VERSION
+        value: "22.13.0"
+      - key: TRUST_PROXY
+        value: "1"
+      - key: DATA_DIR
+        value: /var/data
+      - key: ADMIN_PASSWORD
+        sync: false
+      - key: SESSION_SECRET
+        generateValue: true
+    disk:
+      name: reset-data
+      mountPath: /var/data
+      sizeGB: 1

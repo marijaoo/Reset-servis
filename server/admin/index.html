@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="sr-Latn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>Panel · Reset servis</title>
+<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@300..700&family=Geist+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/admin/admin.css">
+</head>
+<body class="adm">
+<section class="adm-login" id="login" hidden>
+  <form class="wizard" id="login-form" novalidate>
+    <a class="logo" href="/"><span class="logo-mark">R/</span><span data-biz-name>Reset servis</span></a>
+    <h1 style="font-size:1.8rem">Prijava u panel</h1>
+    <div class="field"><label for="pw">Lozinka</label><input id="pw" type="password" autocomplete="current-password" required></div>
+    <p class="form-err" id="login-err" hidden></p>
+    <button class="btn btn-primary" type="submit">Prijavi se</button>
+  </form>
+</section>
+
+<div class="adm-app" id="app" hidden>
+  <header class="adm-top">
+    <a class="logo" href="/" target="_blank" rel="noopener"><span class="logo-mark">R/</span><span data-biz-name>Reset servis</span></a>
+    <nav class="adm-tabs" role="tablist">
+      <button type="button" role="tab" data-tab="tickets" aria-selected="true">Nalozi</button>
+      <button type="button" role="tab" data-tab="subs" aria-selected="false">Pretplatnici</button>
+    </nav>
+    <div class="adm-actions">
+      <button class="btn btn-primary btn-sm" type="button" id="new-ticket">+ Novi nalog</button>
+      <a class="btn btn-ghost btn-sm" href="/api/admin/export.csv">Izvoz CSV</a>
+      <button class="btn btn-ghost btn-sm" type="button" id="logout">Odjava</button>
+    </div>
+  </header>
+
+  <main class="adm-main" id="tab-tickets">
+    <div class="adm-filters">
+      <div class="seg" id="stage-filter">
+        <label><input type="radio" name="sf" value="active" checked><span>Aktivni</span></label>
+        <label><input type="radio" name="sf" value="-1"><span>Zakazani</span></label>
+        <label><input type="radio" name="sf" value="6"><span>Spremni</span></label>
+        <label><input type="radio" name="sf" value="7"><span>Preuzeti</span></label>
+        <label><input type="radio" name="sf" value=""><span>Svi</span></label>
+      </div>
+      <input id="q" type="search" placeholder="Pretraga: broj, ime, telefon, uređaj" aria-label="Pretraga naloga">
+    </div>
+    <div class="adm-grid">
+      <div class="adm-list" id="list" aria-live="polite"></div>
+      <form class="adm-detail wizard" id="detail" hidden novalidate>
+        <div class="wz-head"><h2 id="d-title" style="font-size:1.5rem">Nalog</h2><button class="icon-btn" type="button" id="d-close" aria-label="Zatvori">✕</button></div>
+        <div class="adm-stages" id="d-stages" role="group" aria-label="Faza"></div>
+        <fieldset><legend>Klijent</legend>
+          <div class="field-row"><div class="field"><label for="f-name">Ime i prezime</label><input id="f-name" maxlength="100"></div><div class="field"><label for="f-phone">Telefon</label><input id="f-phone" maxlength="30" type="tel"></div></div>
+          <div class="field"><label for="f-email">E-pošta</label><input id="f-email" maxlength="150" type="email"></div>
+        </fieldset>
+        <fieldset><legend>Uređaj i kvar</legend>
+          <div class="field-row"><div class="field"><label for="f-device">Vrsta</label><input id="f-device" maxlength="60" list="dev-list"></div><div class="field"><label for="f-model">Proizvođač i model</label><input id="f-model" maxlength="120"></div></div>
+          <datalist id="dev-list"><option value="Laptop"><option value="Gejming laptop"><option value="MacBook"><option value="Desktop"></datalist>
+          <div class="field"><label for="f-problems">Problemi (odvojeni zarezom)</label><input id="f-problems" maxlength="300"></div>
+          <div class="field"><label for="f-description">Opis klijenta</label><textarea id="f-description" maxlength="2000"></textarea></div>
+          <div class="field-row"><div class="field"><label for="f-slot_day">Termin (datum)</label><input id="f-slot_day" type="date"></div><div class="field"><label for="f-slot_time">Vreme</label><input id="f-slot_time" type="time"></div></div>
+        </fieldset>
+        <fieldset><legend>Servis (vidi i klijent na stranici Status)</legend>
+          <div class="field"><label for="f-diag">Dijagnoza</label><input id="f-diag" maxlength="300"></div>
+          <div class="field-row"><div class="field"><label for="f-price">Cena</label><input id="f-price" maxlength="60" placeholder="npr. 3.500 RSD"></div><div class="field"><label for="f-eta">Rok / napomena za klijenta</label><input id="f-eta" maxlength="80" placeholder="npr. Danas do 17:00"></div></div>
+        </fieldset>
+        <fieldset><legend>Interne beleške (klijent ih ne vidi)</legend>
+          <div class="field"><textarea id="f-notes" maxlength="4000" aria-label="Interne beleške"></textarea></div>
+        </fieldset>
+        <p class="form-err" id="d-err" hidden></p>
+        <p class="form-msg" id="d-ok" hidden></p>
+        <div class="wz-nav">
+          <button class="btn btn-primary" type="submit" id="d-save">Sačuvaj</button>
+          <button class="btn btn-ghost" type="button" id="d-print">Štampaj potvrdu</button>
+          <button class="btn btn-ghost" type="button" id="d-link">Kopiraj link za klijenta</button>
+          <button class="btn btn-ghost adm-danger" type="button" id="d-delete">Obriši</button>
+        </div>
+        <div class="adm-confirm" id="d-confirm" hidden><span>Obrisati ovaj nalog zauvek?</span><button class="btn btn-sm adm-danger-solid" type="button" id="d-delete-yes">Da, obriši</button><button class="btn btn-ghost btn-sm" type="button" id="d-delete-no">Ne</button></div>
+      </form>
+    </div>
+  </main>
+
+  <main class="adm-main" id="tab-subs" hidden>
+    <p class="lead">Adrese prijavljene za savete putem sajta.</p>
+    <div class="table-wrap"><table><thead><tr><th>E-pošta</th><th>Prijava</th><th></th></tr></thead><tbody id="subs"></tbody></table></div>
+  </main>
+</div>
+
+<div class="adm-print" id="print" aria-hidden="true"></div>
+<script src="/assets/site-data.js"></script>
+<script src="/admin/admin.js"></script>
+</body>
+</html>

@@ -128,7 +128,8 @@
     var get = function (t) { var p = parts.filter(function (x) { return x.type === t; })[0]; return p ? p.value : ''; };
     var dayIdx = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].indexOf(get('weekday'));
     var mins = parseInt(get('hour'), 10) % 24 * 60 + parseInt(get('minute'), 10);
-    var hours = { 0: null, 6: [600, 900] }; for (var d = 1; d <= 5; d++) hours[d] = [540, 1140];
+    var toMin = function (t) { var x = t.split(':'); return +x[0] * 60 + +x[1]; };
+    var hours = {}; for (var d = 0; d < 7; d++) { var hh = RS.hours && RS.hours[d]; hours[d] = hh ? [toMin(hh[0]), toMin(hh[1])] : null; }
     var h = hours[dayIdx], open = h && mins >= h[0] && mins < h[1];
     var hhmm = function (m) { return String(Math.floor(m / 60)).padStart(2, '0') + ':' + String(m % 60).padStart(2, '0'); };
     var text;
@@ -411,68 +412,168 @@
     if (e.key === 'Escape') { closePalette(); setMenu(false); }
   });
 
+  /* ---------- Komunikacija sa serverom ---------- */
+  function api(method, path, body) {
+    var ctrl = window.AbortController ? new AbortController() : null;
+    var timer = setTimeout(function () { if (ctrl) ctrl.abort(); }, 12000);
+    return fetch('/api/' + path, {
+      method: method, headers: body ? { 'Content-Type': 'application/json' } : {},
+      body: body ? JSON.stringify(body) : undefined, signal: ctrl ? ctrl.signal : undefined, credentials: 'same-origin'
+    }).then(function (r) {
+      clearTimeout(timer);
+      return r.json().catch(function () { return {}; }).then(function (data) { return { ok: r.ok, status: r.status, data: data }; });
+    }, function () { clearTimeout(timer); return { ok: false, status: 0, data: {} }; });
+  }
+  var esc = function (x) { var d = document.createElement('div'); d.textContent = x == null ? '' : String(x); return d.innerHTML; };
+
   /* ---------- Status popravke ---------- */
+  var DAYS = ['Ned', 'Pon', 'Uto', 'Sre', 'Čet', 'Pet', 'Sub'];
+  function fmtTime(t) {
+    if (!t) return '—';
+    if (!/^\d{4}-\d\d-\d\dT/.test(t)) return t;
+    try {
+      var d = new Date(t), p = new Intl.DateTimeFormat('en-GB', { timeZone: 'Europe/Belgrade', weekday: 'short', day: 'numeric', month: 'numeric', hour: '2-digit', minute: '2-digit', hour12: false }).formatToParts(d);
+      var g = function (k) { return (p.filter(function (x) { return x.type === k; })[0] || {}).value; };
+      return DAYS[['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].indexOf(g('weekday'))] + ' ' + g('day') + '.' + g('month') + '. ' + g('hour') + ':' + g('minute');
+    } catch (e) { return t; }
+  }
+  function renderOrder(code, o) {
+    var st = RS.stages || [], stage = o.stage, times = o.times || [];
+    var label = stage < 0 ? 'Termin zakazan' : stage === 2 ? 'Čeka vaše odobrenje' : stage === 7 ? 'Preuzet' : st[stage];
+    var tl = '';
+    for (var i = 0; i < st.length; i++) {
+      if (i === 7 && stage !== 7) continue;
+      var cls = (i < stage || (i === stage && (stage === 6 || stage === 7))) ? 'done' : (i === stage ? 'now' : '');
+      tl += '<li class="' + cls + '"><span></span><span>' + esc(st[i]) + '</span><time>' + esc(fmtTime(times[i])) + '</time></li>';
+    }
+    var meta = [['Uređaj', o.device], ['Prijavljen kvar', o.issue], ['Dijagnoza', o.diag], ['Cena', o.price]].filter(function (m) { return m[1]; })
+      .map(function (m) { return '<div><span>' + m[0] + '</span><b>' + esc(m[1]) + '</b></div>'; }).join('');
+    var note = stage < 0 ? '<p class="lead">Uređaj još nije predat. Kada ga donesete, ovde ćete pratiti svaku fazu popravke.' + (o.slot ? ' Termin: <b>' + esc(o.slot) + '</b>.' : '') + '</p>' : '';
+    return '<div class="tr-top"><div style="display:grid;gap:8px"><span class="eyebrow">' + esc(code) + (RS.demo && RS.demoOrders[code] ? ' <span class="probno">demo</span>' : '') + '</span><h2>' + esc(label) + '</h2></div>' +
+      (o.eta ? '<span class="badge">● ' + esc(o.eta) + '</span>' : '') + '</div>' + (meta ? '<div class="tr-meta">' + meta + '</div>' : '') + note + (stage >= 0 ? '<ol class="tl">' + tl + '</ol>' : '');
+  }
   var trackForm = $('[data-track]');
   if (trackForm) {
-    var codeIn = $('#track-code'), out = $('[data-track-result]'), err = $('[data-track-err]');
-    var show = function (code) {
-      code = code.trim().toUpperCase().replace(/\s+/g, '');
-      if (/^\d{4}$/.test(code)) code = 'RN-2026-' + code;
-      var html = RS.orders && RS.orders[code];
-      err.hidden = !!html;
-      if (!html) return;
-      codeIn.value = code;
+    var codeIn = $('#track-code'), out = $('[data-track-result]'), err = $('[data-track-err]'), trackBtn = $('button[type=submit]', trackForm);
+    var showOrder = function (code, o) {
+      codeIn.value = code; err.hidden = true;
       out.animate([{ opacity: 0, transform: 'translateY(12px)' }, { opacity: 1, transform: 'none' }], { duration: reduce ? 1 : 500, easing: 'cubic-bezier(.16,1,.3,1)' });
-      out.innerHTML = html;
+      out.innerHTML = renderOrder(code, o);
     };
-    trackForm.addEventListener('submit', function (e) { e.preventDefault(); show(codeIn.value); });
-    $$('[data-code]').forEach(function (b) { b.addEventListener('click', function () { show(b.getAttribute('data-code')); }); });
+    var showErr = function (msg) { err.textContent = msg; err.hidden = false; };
+    var lookup = function (raw) {
+      var code = String(raw || '').trim().toUpperCase().replace(/\s+/g, '');
+      if (!code) { showErr('Upišite broj radnog naloga.'); return; }
+      if (/^[0-9A-Z]{4,6}$/.test(code)) code = 'RN-' + new Date().getFullYear() + '-' + code;
+      if (RS.demo && RS.demoOrders && RS.demoOrders[code]) { showOrder(code, RS.demoOrders[code]); return; }
+      trackBtn.disabled = true;
+      api('GET', 'orders/' + encodeURIComponent(code)).then(function (r) {
+        trackBtn.disabled = false;
+        if (r.ok && r.data && r.data.order) showOrder(code, r.data.order);
+        else if (r.status === 404) showErr('Nalog sa tim brojem nije pronađen. Proverite broj sa potvrde.');
+        else if (r.status === 429) showErr('Previše pokušaja. Sačekajte minut pa probajte ponovo.');
+        else showErr(RS.demo ? 'U demo verziji rade samo primeri ispod.' : 'Provera trenutno nije dostupna. Pozovite nas na ' + RS.phone + '.');
+      });
+    };
+    trackForm.addEventListener('submit', function (e) { e.preventDefault(); lookup(codeIn.value); });
+    $$('[data-code]').forEach(function (b) { b.addEventListener('click', function () { lookup(b.getAttribute('data-code')); }); });
+    var qp = (location.hash.match(/^#(RN-[0-9]{4}-[0-9A-Z]{4,6})$/i) || [])[1];
+    if (qp) lookup(qp); else if (codeIn.value) lookup(codeIn.value);
+    window.addEventListener('hashchange', function () {
+      var h = (location.hash.match(/^#(RN-[0-9]{4}-[0-9A-Z]{4,6})$/i) || [])[1];
+      if (h) lookup(h);
+    });
   }
 
   /* ---------- Čarobnjak za zakazivanje ---------- */
   var wz = $('[data-wizard]');
   if (wz) {
-    var stepNo = 1, total = 4;
-    var days = $('[data-days]');
+    var stepNo = 1, total = 4, sending = false;
+    var pad = function (n) { return String(n).padStart(2, '0'); };
+    var days = $('[data-days]'), timesEl = $('[data-times]');
+    var renderTimes = function () {
+      var chosen = wz.querySelector('[name=wz-day]:checked'), dow = chosen ? +chosen.getAttribute('data-dow') : 1;
+      var hh = RS.hours && RS.hours[dow], html = '';
+      if (hh) {
+        var toMin = function (t) { var x = t.split(':'); return +x[0] * 60 + +x[1]; };
+        for (var m = toMin(hh[0]); m <= toMin(hh[1]) - 60; m += 60) {
+          var lab = pad(Math.floor(m / 60)) + ':' + pad(m % 60);
+          html += '<label><input type="radio" name="wz-time" value="' + lab + '"' + (html ? '' : ' checked') + '><span>' + lab + '</span></label>';
+        }
+      }
+      timesEl.innerHTML = html;
+    };
     if (days) {
-      var dn = ['Ned', 'Pon', 'Uto', 'Sre', 'Čet', 'Pet', 'Sub'], d0 = new Date(), added = 0, html = '';
-      for (var i = 1; added < 6 && i < 14; i++) {
+      var d0 = new Date(), added = 0, html = '';
+      for (var i = 1; added < 6 && i < 21; i++) {
         var dt = new Date(d0.getFullYear(), d0.getMonth(), d0.getDate() + i);
-        if (dt.getDay() === 0) continue;
-        var lab = dn[dt.getDay()] + ' ' + dt.getDate() + '.' + (dt.getMonth() + 1) + '.';
-        html += '<label><input type="radio" name="wz-day" value="' + lab + '"' + (added === 0 ? ' checked' : '') + '><span>' + lab + '</span></label>';
+        if (!(RS.hours && RS.hours[dt.getDay()])) continue;
+        var lab = DAYS[dt.getDay()] + ' ' + dt.getDate() + '.' + (dt.getMonth() + 1) + '.';
+        var iso = dt.getFullYear() + '-' + pad(dt.getMonth() + 1) + '-' + pad(dt.getDate());
+        html += '<label><input type="radio" name="wz-day" value="' + iso + '" data-label="' + lab + '" data-dow="' + dt.getDay() + '"' + (added === 0 ? ' checked' : '') + '><span>' + lab + '</span></label>';
         added++;
       }
       days.innerHTML = html;
+      days.addEventListener('change', renderTimes);
+      renderTimes();
     }
-    var val = function (n) { var el = wz.querySelector('[name=' + n + ']:checked'); return el ? el.value : '—'; };
-    var summary = function () {
-      var probs = $$('[name=wz-prob]:checked', wz).map(function (x) { return x.value; }).join(', ') || 'nije navedeno';
-      var rows = [['Uređaj', val('wz-dev') + ($('#wz-model').value ? ', ' + $('#wz-model').value : '')], ['Problem', probs], ['Termin', val('wz-day') + ' u ' + val('wz-time')]];
-      var nm = $('#wz-ime').value, tel = $('#wz-tel').value;
-      if (nm) rows.push(['Ime', nm]); if (tel) rows.push(['Telefon', tel]);
-      return rows.map(function (r) { var d = document.createElement('div'); var a = document.createElement('span'); a.textContent = r[0]; var b = document.createElement('b'); b.textContent = r[1]; d.appendChild(a); d.appendChild(b); return d.outerHTML; }).join('');
+    var val = function (n) { var el = wz.querySelector('[name=' + n + ']:checked'); return el ? el.value : ''; };
+    var dayLabel = function () { var el = wz.querySelector('[name=wz-day]:checked'); return el ? el.getAttribute('data-label') : ''; };
+    var collect = function () {
+      return {
+        device: val('wz-dev'), model: $('#wz-model').value.trim(),
+        problems: $$('[name=wz-prob]:checked', wz).map(function (x) { return x.value; }),
+        description: $('#wz-opis').value.trim(), day: val('wz-day'), time: val('wz-time'),
+        name: $('#wz-ime').value.trim(), phone: $('#wz-tel').value.trim(), email: $('#wz-email').value.trim(),
+        consent: $('#wz-consent').checked, website: $('#wz-web').value
+      };
     };
+    var summary = function () {
+      var d = collect();
+      var rows = [['Uređaj', d.device + (d.model ? ', ' + d.model : '')], ['Problem', d.problems.join(', ') || 'nije navedeno'], ['Termin', d.day ? dayLabel() + ' u ' + d.time : 'bez termina']];
+      if (d.name) rows.push(['Ime', d.name]); if (d.phone) rows.push(['Telefon', d.phone]);
+      return rows.map(function (r) { return '<div><span>' + esc(r[0]) + '</span><b>' + esc(r[1]) + '</b></div>'; }).join('');
+    };
+    var errEl = $('[data-wz-err]', wz), done = $('[data-wz-done]', wz), next = $('[data-wz-next]', wz);
     var render = function () {
       $$('.wz-step', wz).forEach(function (s) { s.hidden = +s.getAttribute('data-step') !== stepNo; });
       $$('.wz-progress i', wz).forEach(function (b, i) { b.classList.toggle('on', i < Math.min(stepNo, total)); });
       $('[data-wz-label]', wz).textContent = stepNo > total ? 'Gotovo' : 'Korak ' + stepNo + ' od ' + total;
       $('[data-wz-prev]', wz).hidden = stepNo === 1 || stepNo > total;
-      var next = $('[data-wz-next]', wz);
       next.hidden = stepNo > total;
-      next.firstChild.nodeValue = stepNo === total ? 'Potvrdi termin ' : 'Dalje ';
+      next.firstChild.nodeValue = stepNo === total ? 'Pošalji zahtev ' : 'Dalje ';
       if (stepNo === total) $('[data-wz-summary]', wz).innerHTML = summary();
-      if (stepNo > total) { $('[data-wz-summary2]', wz).innerHTML = summary(); $('[data-step="5"]', wz).focus(); }
+      if (stepNo > total) done.focus();
     };
-    $('[data-wz-next]', wz).addEventListener('click', function () {
-      if (stepNo === total) {
-        var ok = $('#wz-ime').value.trim() && $('#wz-tel').value.trim();
-        $('[data-wz-err]', wz).hidden = !!ok;
-        if (!ok) return;
-      }
-      stepNo++; render();
+    var finish = function (html) { done.innerHTML = html; stepNo = total + 1; render(); };
+    next.addEventListener('click', function () {
+      if (stepNo < total) { stepNo++; render(); return; }
+      if (sending) return;
+      var d = collect(), msg = '';
+      if (d.name.length < 2) msg = 'Upišite ime i prezime.';
+      else if (d.phone.replace(/\D/g, '').length < 6) msg = 'Upišite ispravan broj telefona.';
+      else if (d.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(d.email)) msg = 'E-pošta nije ispravna.';
+      else if (!d.consent) msg = 'Potrebna je vaša saglasnost da bismo vas kontaktirali.';
+      errEl.textContent = msg; errEl.hidden = !msg;
+      if (msg) return;
+      sending = true; next.disabled = true; next.firstChild.nodeValue = 'Šaljem… ';
+      api('POST', 'bookings', d).then(function (r) {
+        sending = false; next.disabled = false;
+        var sum = '<div class="summary-list">' + summary() + '</div>';
+        if (r.ok && r.data.code) {
+          finish('<p class="eyebrow">Zahtev je primljen</p><h3 style="font-size:1.6rem">Hvala, ' + esc(d.name.split(' ')[0]) + '!</h3>' +
+            '<p class="lead">Javićemo vam se da potvrdimo termin. Vaš broj naloga je:</p><div class="wz-code">' + esc(r.data.code) + '</div>' +
+            '<p class="note">Sačuvajte ga. Sa njim pratite popravku na stranici <a class="link-arrow" href="status.html#' + esc(r.data.code) + '">Status popravke</a>.</p>' + sum);
+        } else if (r.status === 400 || r.status === 429) {
+          errEl.textContent = r.data.error || 'Proverite unete podatke.'; errEl.hidden = false; render();
+        } else if (RS.demo) {
+          finish('<p class="eyebrow">Demo</p><h3 style="font-size:1.6rem">Hvala! Ovo je bio prikaz zakazivanja.</h3><p class="form-msg">Zahtev nije poslat jer ova demo verzija nema server. Na pravom sajtu ovde stiže broj radnog naloga, na primer RN-2026-7KQ4M.</p>' + sum);
+        } else {
+          errEl.textContent = 'Slanje nije uspelo. Pokušajte ponovo ili nas pozovite na ' + RS.phone + '.'; errEl.hidden = false; render();
+        }
+      });
     });
-    $('[data-wz-prev]', wz).addEventListener('click', function () { stepNo--; render(); });
+    $('[data-wz-prev]', wz).addEventListener('click', function () { stepNo--; errEl.hidden = true; render(); });
     render();
   }
 
@@ -484,7 +585,19 @@
     });
   });
   $$('[data-demo-form]').forEach(function (f) {
-    f.addEventListener('submit', function (e) { e.preventDefault(); var m = f.nextElementSibling; if (m) { m.hidden = false; m.focus(); } });
+    f.addEventListener('submit', function (e) {
+      e.preventDefault();
+      var m = f.nextElementSibling, input = $('input', f), btn = $('button', f), email = input.value.trim();
+      var say = function (t, ok) { m.textContent = t; m.className = ok ? 'form-msg' : 'form-err'; m.hidden = false; };
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { say('Upišite ispravnu adresu e-pošte.'); return; }
+      btn.disabled = true;
+      api('POST', 'newsletter', { email: email }).then(function (r) {
+        btn.disabled = false;
+        if (r.ok) { say('Hvala! Prijavljeni ste.', true); input.value = ''; }
+        else if (RS.demo && r.status !== 400 && r.status !== 429) say('Ovo je demo, pa prijava nije poslata.', true);
+        else say(r.data.error || 'Prijava trenutno nije uspela. Pokušajte kasnije.');
+      });
+    });
   });
   var cookie = $('.cookie');
   if (cookie && !store.get('rs-cookie')) {

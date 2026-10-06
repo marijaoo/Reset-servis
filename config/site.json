@@ -1,0 +1,41 @@
+{
+  "_uputstvo": "Ovde upišite prave podatke o servisu, pa pokrenite: python3 tools/build.py. Kada je sve upisano, stavite \"demo\": false — nestaju demo traka, oznake 'probno', probne recenzije i probni nalozi.",
+  "demo": true,
+  "siteUrl": "https://www.vas-domen.rs",
+  "business": {
+    "name": "Reset servis",
+    "legalName": "Reset servis d.o.o.",
+    "pib": "",
+    "maticniBroj": ""
+  },
+  "contact": {
+    "street": "Bulevar kralja Aleksandra 000",
+    "postal": "11000",
+    "city": "Beograd",
+    "phone": "+381 11 000 0000",
+    "mobile": "+381 60 000 0000",
+    "email": "servis@primer.rs",
+    "mapUrl": "https://www.openstreetmap.org/#map=15/44.8040/20.4790",
+    "directions": "Primer lokacije: blizu Vukovog spomenika, linije 7, 12 i 14. Parking u okolnim ulicama (zona 2)."
+  },
+  "hours": {
+    "weekdays": ["09:00", "19:00"],
+    "saturday": ["10:00", "15:00"],
+    "sunday": null
+  },
+  "rating": { "value": "4,9", "count": "2.400+ popravki" },
+  "stats": [
+    { "value": 2400, "suffix": "+", "label": "popravljenih uređaja" },
+    { "value": 24, "suffix": "h", "label": "prosečan rok za čišćenje i sistem" },
+    { "value": 6, "suffix": "mes.", "label": "garancija na rad i delove" },
+    { "value": 98, "suffix": "%", "label": "popravki bez zamene ploče" }
+  ],
+  "reviews": [
+    { "initials": "MJ", "name": "Milica J.", "place": "Vračar", "text": "Laptop se gasio usred rada. Sutradan je bio gotov, tih i hladan. Dobila sam i fotografije pre i posle čišćenja." },
+    { "initials": "NP", "name": "Nikola P.", "place": "Novi Beograd", "text": "Prosuo sam kafu na tastaturu u ponedeljak. U sredu je laptop radio, a podaci su ostali netaknuti." },
+    { "initials": "AS", "name": "Ana S.", "place": "Zvezdara", "text": "Jasna procena pre popravke i tačno ta cena na računu. Tako treba da izgleda servis." },
+    { "initials": "DM", "name": "Dušan M.", "place": "Zemun", "text": "Ugradili su SSD i prebacili ceo sistem. Stari računar se sada pali za desetak sekundi." },
+    { "initials": "JK", "name": "Jelena K.", "place": "Voždovac", "text": "Za našu kancelariju održavaju 8 računara. Kad nešto stane, dođu isti dan." },
+    { "initials": "SR", "name": "Stefan R.", "place": "Palilula", "text": "Zamenili su konektor za punjenje umesto cele ploče. Platio sam trećinu cene koju su mi drugde tražili." }
+  ]
+}
