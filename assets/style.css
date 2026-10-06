@@ -635,11 +635,14 @@ textarea { min-height: 130px; resize: vertical; }
 
 /* ---------- Pojavljivanje pri skrolovanju ---------- */
 .js-reveal .reveal { opacity: 0; transform: translateY(36px); filter: blur(6px); transition: opacity 1s var(--ease), transform 1.1s var(--ease), filter 1s var(--ease); transition-delay: var(--d, 0ms); }
+.js-reveal .reveal.from-top { transform: translateY(-36px); }
 .js-reveal .reveal.in { opacity: 1; transform: none; filter: none; }
+.js-reveal .reveal:not(.in), .js-reveal .split:not(.in) .wi { transition-delay: 0ms; }
 .js-reveal .reveal:not(.in) .range-seg, .js-reveal .reveal:not(.in) .ba-bar i { transform: scaleX(0); }
 .split .w { display: inline-block; overflow: hidden; vertical-align: top; padding-bottom: .08em; margin-bottom: -.08em; }
 .split .wi { display: inline-block; transform: translateY(0); }
 .js-reveal .split .wi { transform: translateY(105%); transition: transform 1.1s var(--ease); transition-delay: calc(var(--i) * 55ms + 120ms); }
+.js-reveal .split.from-top .wi { transform: translateY(-105%); }
 .js-reveal .split.in .wi { transform: none; }
 
 /* Male strelice u linkovima */

@@ -168,13 +168,26 @@
       while (sib && i < 6) { if (sib.classList.contains('reveal')) i++; sib = sib.previousElementSibling; }
       el.style.setProperty('--d', (i * 80) + 'ms');
     });
+    // Radi u oba smera: element koji izađe sa ekrana se sakrije i ponovo pojavi
+    // kad se vrati, klizeći iz smera iz kog dolazi (odozdo ili odozgo).
     var io = new IntersectionObserver(function (entries) {
-      entries.forEach(function (e) { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } });
+      entries.forEach(function (e) {
+        var el = e.target;
+        if (e.isIntersecting) { el.classList.add('in'); }
+        else {
+          var above = e.boundingClientRect.bottom <= (e.rootBounds ? e.rootBounds.top : 0) + 1;
+          el.classList.remove('in');
+          el.classList.toggle('from-top', above);
+        }
+      });
     }, { rootMargin: '0px 0px -6% 0px', threshold: 0.08 });
     items.forEach(function (el) { io.observe(el); });
-    setTimeout(function () { items.forEach(function (el) { if (el.getBoundingClientRect().top < window.innerHeight) el.classList.add('in'); }); }, 1600);
+    setTimeout(function () { items.forEach(function (el) { var r = el.getBoundingClientRect(); if (r.top < window.innerHeight && r.bottom > 0) el.classList.add('in'); }); }, 1600);
     var cio = new IntersectionObserver(function (entries) {
-      entries.forEach(function (e) { if (e.isIntersecting) { runCounter(e.target); cio.unobserve(e.target); } });
+      entries.forEach(function (e) {
+        if (e.isIntersecting && !e.target._counted) { e.target._counted = true; runCounter(e.target); }
+        else if (!e.isIntersecting) e.target._counted = false;
+      });
     }, { threshold: 0.6 });
     counters.forEach(function (c) { cio.observe(c); });
   }
@@ -201,13 +214,13 @@
       });
       el.addEventListener('pointerleave', function () { el.style.transform = ''; });
     });
-    var cur = $('.cursor');
-    if (cur) {
+    var cursorEl = $('.cursor');
+    if (cursorEl) {
       var cx = -100, cy = -100, tx = -100, ty = -100;
-      window.addEventListener('pointermove', function (e) { tx = e.clientX; ty = e.clientY; cur.classList.add('on'); }, { passive: true });
-      document.addEventListener('pointerleave', function () { cur.classList.remove('on'); });
-      (function loop() { cx += (tx - cx) * .18; cy += (ty - cy) * .18; cur.style.transform = 'translate(' + cx + 'px,' + cy + 'px)'; requestAnimationFrame(loop); })();
-      document.addEventListener('pointerover', function (e) { cur.classList.toggle('hover', !!e.target.closest('a, button, summary, label, input[type=range], select')); });
+      window.addEventListener('pointermove', function (e) { tx = e.clientX; ty = e.clientY; cursorEl.classList.add('on'); }, { passive: true });
+      document.addEventListener('pointerleave', function () { cursorEl.classList.remove('on'); });
+      (function loop() { cx += (tx - cx) * .18; cy += (ty - cy) * .18; cursorEl.style.transform = 'translate(' + cx + 'px,' + cy + 'px)'; requestAnimationFrame(loop); })();
+      document.addEventListener('pointerover', function (e) { cursorEl.classList.toggle('hover', !!e.target.closest('a, button, summary, label, input[type=range], select')); });
     }
   }
 
@@ -260,9 +273,9 @@
   /* ---------- Pripovedanje postupka: aktivna je kartica koja stoji uz crtež ---------- */
   var storySteps = $$('[data-story]');
   if (storySteps.length) {
-    var frameEls = $$('[data-frame]'), num = $('[data-story-num]'), stage = $('.story-stage'), cur = -1;
+    var frameEls = $$('[data-frame]'), num = $('[data-story-num]'), stage = $('.story-stage'), storyCur = -1;
     var setStory = function (i) {
-      if (i === cur) return; cur = i;
+      if (i === storyCur) return; storyCur = i;
       storySteps.forEach(function (s, j) { s.classList.toggle('active', j === i); });
       frameEls.forEach(function (f, j) { f.classList.toggle('active', j === i); });
       if (num) num.textContent = '0' + (i + 1);
