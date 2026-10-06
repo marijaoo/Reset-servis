@@ -56,19 +56,28 @@
   }
   // Stvarni položaj elementa, bez privremenog pomeranja iz animacije pojavljivanja
   function absTop(el) { var y = 0; while (el) { y += el.offsetTop; el = el.offsetParent; } return y; }
-  function scrollToEl(target) {
+  // Kad je sajt ugrađen u okvir koji se sam ne skroluje (npr. pregled u aplikaciji),
+  // skroluje se stranica oko okvira: tada pomeramo preko scrollIntoView, koji radi i kroz okvir.
+  function pageCanScroll() { return document.documentElement.scrollHeight > window.innerHeight + 2; }
+  function scrollToEl(target, instant) {
+    var behavior = instant || reduce ? 'auto' : 'smooth';
+    if (!pageCanScroll()) {
+      var el = target === 0 ? document.body : target;
+      try { el.scrollIntoView({ block: 'start', behavior: behavior }); } catch (e) { el.scrollIntoView(true); }
+      return;
+    }
     var y = target === 0 ? 0 : Math.max(0, absTop(target) - 92);
-    if (lenis) lenis.scrollTo(y, { duration: 1.4 });
-    else window.scrollTo({ top: y, behavior: reduce ? 'auto' : 'smooth' });
+    if (lenis) lenis.scrollTo(y, instant ? { immediate: true } : { duration: 1.4 });
+    else window.scrollTo({ top: y, behavior: behavior });
   }
-  // Dolazak sa druge stranice na #deo: postavi deo tačno ispod menija
-  if (location.hash && /^#[\w-]+$/.test(location.hash)) {
-    var hashEl = document.getElementById(location.hash.slice(1));
-    if (hashEl) setTimeout(function () {
-      var y = Math.max(0, absTop(hashEl) - 92);
-      if (lenis) lenis.scrollTo(y, { immediate: true }); else window.scrollTo(0, y);
-    }, 60);
-  }
+  // Nova stranica uvek počinje od vrha (ili od traženog dela, ako link ima #deo).
+  // Povratak dugmetom „nazad“ zadržava položaj koji je pregledač zapamtio.
+  (function () {
+    var nav = performance.getEntriesByType && performance.getEntriesByType('navigation')[0];
+    if (nav && nav.type === 'back_forward') return;
+    var hashEl = location.hash && /^#[\w-]+$/.test(location.hash) ? document.getElementById(location.hash.slice(1)) : null;
+    setTimeout(function () { scrollToEl(hashEl || 0, true); }, 60);
+  })();
   $$('a[href^="#"]').forEach(function (a) {
     a.addEventListener('click', function (e) {
       var id = a.getAttribute('href').slice(1); var el = id && document.getElementById(id);
