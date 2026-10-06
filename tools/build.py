@@ -218,7 +218,7 @@ BRANDS = ["Lenovo", "Dell", "HP", "ASUS", "Acer", "Apple MacBook", "MSI", "Samsu
 story = ""
 frames = ""
 for i, (h, short, t, d, e) in enumerate(STEPS):
-    story += f'<li class="story-step{" active" if i == 0 else ""}" data-story="{i}"><span class="num">0{i+1} — {t}</span><h3>{h}</h3><p>{d}</p></li>'
+    story += f'<li class="story-step{" active" if i == 0 else ""}" data-story="{i}"><span class="num">0{i+1} — {t}</span><h3>{h}</h3><p>{d}</p><ul>{"".join(f"<li>{x}</li>" for x in e)}</ul></li>'
     frames += f'<div class="frame{" active" if i == 0 else ""}" data-frame="{i}">{PHASE_ILLUS[i]}</div>'
 
 all_q = [qa for _, items in FAQ for qa in items]
