@@ -153,7 +153,7 @@
   /* ---------- Pojavljivanje pri skrolovanju ---------- */
   var REVEAL = '.hero-copy > *:not(h1), .console, .stat, .section-head > *:not(.split), .tile, .card, .phase, .step, .faq-group > *, .cta > *:not(.split), ' +
     '.page-head > *:not(h1), .svc-hero > .illus-panel, .list-box, .range-row, .range-axis, .ba, .tip, .table-wrap, .info-list > li, .map-box, .wizard, ' +
-    '.compare, .temp-pair, .calc, .review, .track-form, .track-result, .marquee-label, .newsletter, .footer-grid > div, .story-stage';
+    '.compare, .temp-pair, .calc, .review, .track-form, .track-result, .marquee-label, .newsletter, .footer-grid > div';
   var counters = $$('[data-count]');
   function runCounter(el) {
     var to = +el.getAttribute('data-count'), t0 = performance.now(), dur = 1800;
@@ -257,21 +257,33 @@
     input.addEventListener('input', set); set();
   });
 
-  /* ---------- Pripovedanje postupka ---------- */
-  var storySteps = $$('[data-story]');
-  if (storySteps.length) {
-    var frameEls = $$('[data-frame]'), num = $('[data-story-num]'), stage = $('.story-stage');
+  /* ---------- Pripovedanje postupka: kartica i crtež zakačeni zajedno ---------- */
+  var pin = $('.story-pin');
+  if (pin) {
+    var sticky = $('.story-sticky', pin), storySteps = $$('[data-story]', pin), frameEls = $$('[data-frame]', pin), dotEls = $$('[data-goto]', pin);
+    var num = $('[data-story-num]', pin), stage = $('.story-stage', pin), n = storySteps.length, cur = -1;
     var setStory = function (i) {
+      if (i === cur) return; cur = i;
       storySteps.forEach(function (s, j) { s.classList.toggle('active', j === i); });
       frameEls.forEach(function (f, j) { f.classList.toggle('active', j === i); });
+      dotEls.forEach(function (d, j) { d.classList.toggle('on', j === i); });
       if (num) num.textContent = '0' + (i + 1);
-      if (stage) stage.style.setProperty('--sp', ((i + 1) / storySteps.length).toFixed(3));
+      if (stage) stage.style.setProperty('--sp', ((i + 1) / n).toFixed(3));
     };
-    setStory(0);
-    var sio = new IntersectionObserver(function (entries) {
-      entries.forEach(function (e) { if (e.isIntersecting) setStory(+e.target.getAttribute('data-story')); });
-    }, { rootMargin: '-45% 0px -45% 0px' });
-    storySteps.forEach(function (s) { sio.observe(s); });
+    var range = function () { return Math.max(1, pin.offsetHeight - sticky.offsetHeight); };
+    var updateStory = function () {
+      var p = Math.min(.9999, Math.max(0, -pin.getBoundingClientRect().top / range()));
+      setStory(Math.floor(p * n));
+    };
+    dotEls.forEach(function (d, i) {
+      d.addEventListener('click', function () {
+        var y = pin.getBoundingClientRect().top + window.scrollY + (i + .5) / n * range();
+        if (lenis) lenis.scrollTo(y, { duration: 1.2 }); else window.scrollTo({ top: y, behavior: reduce ? 'auto' : 'smooth' });
+      });
+    });
+    window.addEventListener('scroll', function () { requestAnimationFrame(updateStory); }, { passive: true });
+    window.addEventListener('resize', updateStory);
+    updateStory();
   }
 
   /* ---------- Kalkulator ---------- */
