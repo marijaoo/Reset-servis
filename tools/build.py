@@ -49,7 +49,7 @@ def header(current):
     def cur(h): return ' aria-current="page"' if h == current else ""
     items = f'<div class="nav-item"><a href="usluge.html"{cur("usluge.html")}>Usluge {CHEV}</a>{mega()}</div>'
     items += "".join(f'<a href="{h}"{cur(h)}>{l}</a>' for h, l in NAV[1:])
-    mm = "".join(f'<a href="{h}" style="transition-delay:{120+i*60}ms"><small>0{i+1}</small>{l}</a>' for i, (h, l) in enumerate([("index.html", "Početna")] + NAV))
+    mm = "".join(f'<a href="{h}"{cur(h)} style="transition-delay:{120+i*60}ms"><small>0{i+1}</small>{l}</a>' for i, (h, l) in enumerate([("index.html", "Početna")] + NAV))
     return f'''
 <div class="loader" aria-hidden="true"><div class="loader-inner"><span class="logo-mark">R/</span><div class="loader-count" data-loader-count>0</div><div class="loader-line"><i data-loader-line></i></div></div></div>
 <div class="progress-bar" aria-hidden="true"></div>
