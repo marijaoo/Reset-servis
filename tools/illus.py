@@ -144,3 +144,36 @@ PHASE_ICONS = [
  icon('<path d="M3 12h4l3-8 4 16 3-8h4"/>'),
  icon('<path d="M3 8l9-5 9 5v8l-9 5-9-5z"/><path d="M8.5 12l2.5 2.5 5-5"/>'),
 ]
+
+def fan_scene(dirty):
+    """Ventilator laptopa pre (prašnjav) i posle čišćenja, za klizač pre/posle."""
+    dust = ""
+    if dirty:
+        import random
+        rnd = random.Random(7)
+        for _ in range(70):
+            x, y, r = rnd.uniform(60, 250), rnd.uniform(40, 200), rnd.uniform(1.5, 5)
+            dust += f'<circle class="dust" cx="{x:.1f}" cy="{y:.1f}" r="{r:.1f}"/>'
+        dust += '<path class="dust" d="M70 70c30-8 50 6 80-4s40 10 70 2v12c-30 8-40-10-70-2s-50-6-80 4z" opacity=".5"/>'
+    blades = "".join(f'<path class="a" d="M155 120c-6-30 4-52 26-60 6 22-4 44-26 60z" opacity="{.55 if dirty else .95}" transform="rotate({a} 155 120)"/>' for a in range(0, 360, 45))
+    spin = "spin-slow" if dirty else "spin"
+    therm_h = 96 if dirty else 52
+    therm_col = "s" if dirty else "ok"
+    label = "Prašnjav ventilator pre čišćenja" if dirty else "Čist ventilator posle čišćenja"
+    return svg(f'''<rect class="b" x="40" y="22" width="232" height="196" rx="22"/>
+<circle class="t" cx="155" cy="120" r="78"/><circle class="t" cx="155" cy="120" r="84"/>
+<g class="{spin}" style="transform-origin:155px 120px">{blades}</g>
+<circle class="b" cx="155" cy="120" r="14"/>
+{dust}
+<rect class="b" x="282" y="40" width="18" height="140" rx="9"/><circle class="b" cx="291" cy="190" r="14"/>
+<rect class="{therm_col}" x="287" y="{176-therm_h}" width="8" height="{therm_h}" rx="4"/><circle class="{therm_col}" cx="291" cy="190" r="9"/>''', label, "0 0 320 240")
+
+MAP_ART = '''<svg viewBox="0 0 400 150" role="img" aria-label="Ilustracija lokacije servisa (nije prava mapa)">
+<rect width="400" height="150" style="fill:var(--bg-2)"/>
+<g style="stroke:var(--line-2);stroke-width:10;fill:none;stroke-linecap:round">
+<path d="M-10 40L410 70"/><path d="M-10 120L410 95"/><path d="M90 -10L130 160"/><path d="M260 -10L240 160"/></g>
+<g style="stroke:var(--line);stroke-width:4;fill:none"><path d="M-10 15L410 30"/><path d="M180 -10L190 160"/><path d="M330 -10L350 160"/><path d="M-10 150L410 130"/></g>
+<path d="M-10 82L410 82" style="stroke:var(--accent);stroke-width:3;fill:none;opacity:.35;stroke-dasharray:2 8;stroke-linecap:round"/>
+<circle cx="200" cy="80" r="26" style="fill:var(--accent);opacity:.15"><animate attributeName="r" values="14;34;14" dur="3s" repeatCount="indefinite"/></circle>
+<path d="M200 48c-12 0-21 9-21 21 0 16 21 33 21 33s21-17 21-33c0-12-9-21-21-21z" style="fill:var(--accent)"/><circle cx="200" cy="69" r="7" style="fill:var(--bg)"/>
+</svg>'''
