@@ -231,9 +231,10 @@ main { display: block; animation: page-in .8s var(--ease) both; }
 @media (min-width: 900px) { .stats { grid-template-columns: repeat(4, 1fr); } }
 .stat { padding: 32px 20px 8px 0; display: grid; gap: 10px; border-bottom: 1px solid var(--line); }
 @media (min-width: 900px) { .stat { border-bottom: 0; border-right: 1px solid var(--line); padding: 36px 28px 8px; } .stat:first-child { padding-left: 0; } .stat:last-child { border-right: 0; } }
-.stat strong { font: 400 clamp(2.6rem, 5vw, 4.2rem)/1 var(--font-display); letter-spacing: -0.05em; font-variant-numeric: tabular-nums; }
+.stat strong { font: 500 clamp(3.2rem, 6.4vw, 5.4rem)/1 var(--font-display); color: var(--ink); letter-spacing: -0.05em; font-variant-numeric: tabular-nums; }
 .stat strong small { font-size: .45em; color: var(--accent); letter-spacing: -0.02em; margin-left: 4px; }
-.stat span { color: var(--muted); font-size: .92rem; }
+.stat > span { color: var(--muted); font-size: .92rem; }
+.stat strong [data-count] { font: inherit; color: var(--ink); }
 
 /* ---------- Bento mreža ---------- */
 .bento { display: grid; gap: 14px; grid-template-columns: 1fr; }
