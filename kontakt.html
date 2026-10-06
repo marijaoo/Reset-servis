@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="sr-Latn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Kontakt · Reset servis</title>
+<meta name="description" content="Adresa, telefon, radno vreme i forma za prijavu kvara.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=IBM+Plex+Mono:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+<div class="demo-bar" role="note">
+  <div class="wrap"><span class="tag">Demo</span> Ovo je probni sajt. Naziv, adresa, telefon, cene i recenzije su izmišljeni podaci za pregled.</div>
+</div>
+<header class="site-header">
+  <div class="wrap">
+    <a class="logo" href="index.html"><span class="logo-mark">R/</span>Reset servis</a>
+    <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="glavni-meni">Meni</button>
+    <nav class="nav" id="glavni-meni" aria-label="Glavni meni">
+      <a href="index.html">Početna</a>
+      <a href="usluge.html">Usluge i cene</a>
+      <a href="postupak.html">Postupak</a>
+      <a href="pitanja.html">Česta pitanja</a>
+      <a href="kontakt.html" aria-current="page">Kontakt</a>
+    </nav>
+  </div>
+</header>
+<main>
+<section class="wrap page-head">
+  <p class="crumbs"><a href="index.html">Početna</a> / Kontakt</p>
+  <h1>Kontakt i prijava kvara</h1>
+  <p class="lead">Donesite uređaj bez zakazivanja ili nam unapred opišite kvar preko forme.</p>
+</section>
+<section class="section">
+  <div class="wrap contact-grid">
+    <div style="display:grid;gap:28px;min-width:0">
+      <ul class="info-list">
+        <li><span class="label">Adresa <span class="probno">probno</span></span><span class="value">Bulevar kralja Aleksandra 000, 11000 Beograd</span></li>
+        <li><span class="label">Telefon <span class="probno">probno</span></span><span class="value">+381 11 000 0000 <button class="copy-btn" type="button" data-copy="+381110000000">Kopiraj</button></span></li>
+        <li><span class="label">Viber / WhatsApp <span class="probno">probno</span></span><span class="value">+381 60 000 0000</span></li>
+        <li><span class="label">E-pošta <span class="probno">probno</span></span><span class="value">servis@primer.rs <button class="copy-btn" type="button" data-copy="servis@primer.rs">Kopiraj</button></span></li>
+        <li><span class="label">Radno vreme <span class="probno">probno</span></span>
+          <div class="hours"><span>Pon–Pet</span><span>09:00–19:00</span><span>Subota</span><span>10:00–15:00</span><span>Nedelja</span><span>zatvoreno</span></div>
+        </li>
+      </ul>
+      <div class="map-box">
+        <strong>Kako do nas</strong>
+        <p style="color:var(--muted)">Primer lokacije: blizu Vukovog spomenika, linije 7, 12 i 14. Parking u okolnim ulicama (zona 2).</p>
+        <a href="https://www.openstreetmap.org/#map=15/44.8040/20.4790" target="_blank" rel="noopener">Otvori mapu Beograda →</a>
+      </div>
+    </div>
+    <form class="panel" id="forma-prijava" novalidate>
+      <h2 style="font-size:1.4rem">Prijavi kvar</h2>
+      <p style="color:var(--muted)">Demo forma: podaci se nigde ne šalju.</p>
+      <div class="field-row">
+        <div class="field"><label for="ime">Ime i prezime</label><input id="ime" name="ime" autocomplete="name" placeholder="Petar Petrović"></div>
+        <div class="field"><label for="telefon">Telefon</label><input id="telefon" name="telefon" type="tel" autocomplete="tel" placeholder="06x xxx xxxx"></div>
+      </div>
+      <div class="field-row">
+        <div class="field"><label for="uredjaj">Vrsta uređaja</label>
+          <select id="uredjaj" name="uredjaj"><option>Laptop</option><option>Desktop računar</option><option>MacBook</option><option>Drugo</option></select></div>
+        <div class="field"><label for="model">Proizvođač i model</label><input id="model" name="model" placeholder="npr. Lenovo IdeaPad 5"></div>
+      </div>
+      <div class="field"><label for="opis">Opis kvara</label><textarea id="opis" name="opis" placeholder="Šta se dešava, od kada, da li je bilo pada ili prosute tečnosti..."></textarea></div>
+      <div class="btn-row"><button class="btn btn-primary" type="submit">Pošalji prijavu</button></div>
+      <p class="form-msg" id="forma-poruka" tabindex="-1" hidden>Ovo je demo sajt, pa prijava nije poslata. Na pravom sajtu ovde bi stigla potvrda sa brojem radnog naloga.</p>
+    </form>
+  </div>
+</section>
+
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <div class="footer-grid">
+      <div>
+        <h3>Reset servis <span class="probno">probno</span></h3>
+        <p>Servis laptopova i računara u Beogradu. Dijagnostika, popravka, čišćenje i nadogradnja.</p>
+      </div>
+      <div>
+        <h3>Stranice</h3>
+        <ul>
+          <li><a href="usluge.html">Usluge i cene</a></li>
+          <li><a href="postupak.html">Postupak servisiranja</a></li>
+          <li><a href="pitanja.html">Česta pitanja</a></li>
+          <li><a href="kontakt.html">Kontakt</a></li>
+        </ul>
+      </div>
+      <div>
+        <h3>Kontakt <span class="probno">probno</span></h3>
+        <ul>
+          <li>Bulevar kralja Aleksandra 000, Beograd</li>
+          <li>+381 11 000 0000</li>
+          <li>servis@primer.rs</li>
+        </ul>
+      </div>
+      <div>
+        <h3>Radno vreme <span class="probno">probno</span></h3>
+        <ul>
+          <li>Pon–Pet: 09–19 h</li>
+          <li>Subota: 10–15 h</li>
+          <li>Nedelja: zatvoreno</li>
+        </ul>
+      </div>
+    </div>
+    <p class="footer-note">© <span id="godina">2026</span> Reset servis — demo sajt. Svi podaci na ovoj stranici su probni i služe samo za pregled dizajna.</p>
+  </div>
+</footer>
+<button class="to-top" type="button" aria-label="Vrati se na vrh stranice">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+</button>
+<script src="assets/script.js"></script>
+</body>
+</html>
