@@ -1,6 +1,13 @@
 # Reset servis — demo sajt
 
-Demo sajt na srpskom za servis laptopova i računara u Beogradu. Svi podaci (adresa, telefon, cene, ocene) su probni i jasno označeni.
+Demo sajt na srpskom za servis laptopova i računara u Beogradu. Svi podaci (adresa, telefon, cene, ocene, merenja) su probni i jasno označeni.
 
-Stranice: `index.html` (početna), `usluge.html`, `postupak.html`, `pitanja.html`, `kontakt.html`.
-Zajednički stil i skripta su u `assets/`. Sajt je statičan: dovoljno je otvoriti `index.html` u pregledaču.
+Stranice: početna (`index.html`), usluge i cene, posebna stranica za svaku od 9 usluga (opis, šta je uključeno, grafikon raspona cena), postupak servisiranja kroz 7 faza sa crtežima, česta pitanja i kontakt.
+
+Stil i skripta su u `assets/`. Sve stranice generiše `tools/build.py` (crteži su u `tools/illus.py`):
+
+```
+python3 tools/build.py
+```
+
+Sajt je statičan: dovoljno je otvoriti `index.html` u pregledaču.
