@@ -54,10 +54,20 @@
       requestAnimationFrame(raf);
     } catch (e) { lenis = null; }
   }
+  // Stvarni položaj elementa, bez privremenog pomeranja iz animacije pojavljivanja
+  function absTop(el) { var y = 0; while (el) { y += el.offsetTop; el = el.offsetParent; } return y; }
   function scrollToEl(target) {
-    if (lenis) lenis.scrollTo(target, { offset: -80, duration: 1.4 });
-    else if (target === 0) window.scrollTo({ top: 0, behavior: reduce ? 'auto' : 'smooth' });
-    else target.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'start' });
+    var y = target === 0 ? 0 : Math.max(0, absTop(target) - 92);
+    if (lenis) lenis.scrollTo(y, { duration: 1.4 });
+    else window.scrollTo({ top: y, behavior: reduce ? 'auto' : 'smooth' });
+  }
+  // Dolazak sa druge stranice na #deo: postavi deo tačno ispod menija
+  if (location.hash && /^#[\w-]+$/.test(location.hash)) {
+    var hashEl = document.getElementById(location.hash.slice(1));
+    if (hashEl) setTimeout(function () {
+      var y = Math.max(0, absTop(hashEl) - 92);
+      if (lenis) lenis.scrollTo(y, { immediate: true }); else window.scrollTo(0, y);
+    }, 60);
   }
   $$('a[href^="#"]').forEach(function (a) {
     a.addEventListener('click', function (e) {

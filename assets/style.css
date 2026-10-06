@@ -684,3 +684,8 @@ textarea { min-height: 130px; resize: vertical; }
 .calc-out.island { color: var(--ink); }
 .site-header.scrolled { box-shadow: 0 10px 30px -24px rgba(15, 45, 70, .35); }
 .grid-lines { opacity: .45; }
+
+/* Skok na deo stranice: cilj ne sme da završi ispod lepljivog menija */
+[id] { scroll-margin-top: 92px; }
+/* Na telefonu je zakazivanje prvo na stranici Kontakt */
+@media (max-width: 959px) { .contact-grid .wizard { order: -1; } }
