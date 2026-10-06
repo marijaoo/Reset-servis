@@ -257,30 +257,29 @@
     input.addEventListener('input', set); set();
   });
 
-  /* ---------- Pripovedanje postupka: kartica i crtež zakačeni zajedno ---------- */
-  var pin = $('.story-pin');
-  if (pin) {
-    var sticky = $('.story-sticky', pin), storySteps = $$('[data-story]', pin), frameEls = $$('[data-frame]', pin), dotEls = $$('[data-goto]', pin);
-    var num = $('[data-story-num]', pin), stage = $('.story-stage', pin), n = storySteps.length, cur = -1;
+  /* ---------- Pripovedanje postupka: aktivna je kartica koja stoji uz crtež ---------- */
+  var storySteps = $$('[data-story]');
+  if (storySteps.length) {
+    var frameEls = $$('[data-frame]'), num = $('[data-story-num]'), stage = $('.story-stage'), cur = -1;
     var setStory = function (i) {
       if (i === cur) return; cur = i;
       storySteps.forEach(function (s, j) { s.classList.toggle('active', j === i); });
       frameEls.forEach(function (f, j) { f.classList.toggle('active', j === i); });
-      dotEls.forEach(function (d, j) { d.classList.toggle('on', j === i); });
       if (num) num.textContent = '0' + (i + 1);
-      if (stage) stage.style.setProperty('--sp', ((i + 1) / n).toFixed(3));
+      if (stage) stage.style.setProperty('--sp', ((i + 1) / storySteps.length).toFixed(3));
     };
-    var range = function () { return Math.max(1, pin.offsetHeight - sticky.offsetHeight); };
     var updateStory = function () {
-      var p = Math.min(.9999, Math.max(0, -pin.getBoundingClientRect().top / range()));
-      setStory(Math.floor(p * n));
-    };
-    dotEls.forEach(function (d, i) {
-      d.addEventListener('click', function () {
-        var y = pin.getBoundingClientRect().top + window.scrollY + (i + .5) / n * range();
-        if (lenis) lenis.scrollTo(y, { duration: 1.2 }); else window.scrollTo({ top: y, behavior: reduce ? 'auto' : 'smooth' });
+      var st = stage.getBoundingClientRect(), vh = window.innerHeight;
+      // Na širokom ekranu crtež stoji pored kartica: referentna linija je sredina crteža.
+      // Na uskom ekranu crtež je iznad: linija je u prostoru ispod njega.
+      var line = window.innerWidth >= 960 ? (st.top + st.bottom) / 2 : st.bottom + (vh - st.bottom) * 0.4;
+      var best = 0, bestD = Infinity;
+      storySteps.forEach(function (s, i) {
+        var r = s.getBoundingClientRect(), d = line < r.top ? r.top - line : (line > r.bottom ? line - r.bottom : 0);
+        if (d < bestD) { bestD = d; best = i; }
       });
-    });
+      setStory(best);
+    };
     window.addEventListener('scroll', function () { requestAnimationFrame(updateStory); }, { passive: true });
     window.addEventListener('resize', updateStory);
     updateStory();

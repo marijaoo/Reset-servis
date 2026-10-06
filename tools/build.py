@@ -220,7 +220,7 @@ frames = ""
 dots = ""
 for i, (h, short, t, d, e) in enumerate(STEPS):
     act = " active" if i == 0 else ""
-    story += f'<article class="story-step{act}" data-story="{i}"><span class="num">0{i+1} — {t}</span><h3>{h}</h3><p>{d}</p><ul>{"".join(f"<li>{x}</li>" for x in e)}</ul></article>'
+    story += f'<li class="story-step{act}" data-story="{i}"><span class="num">0{i+1} — {t}</span><h3>{h}</h3><p>{d}</p><ul>{"".join(f"<li>{x}</li>" for x in e)}</ul></li>'
     frames += f'<div class="frame{act}" data-frame="{i}">{PHASE_ILLUS[i]}</div>'
     dots += f'<li><button type="button" data-goto="{i}"{" class=\"on\"" if i == 0 else ""} aria-label="Faza {i+1}: {short}">0{i+1}</button></li>'
 
@@ -309,11 +309,9 @@ home = f'''
       <div style="display:grid;gap:18px"><p class="eyebrow">Postupak</p><h2 class="split">Sedam faza. <span class="serif gold">Nijedno iznenađenje.</span></h2></div>
       <p class="lead">Skrolujte kroz ceo put vašeg uređaja, od prijave do preuzimanja.</p>
     </div>
-    <div class="story-pin" style="--n:7">
-      <div class="story-sticky">
-        <div class="story-text"><ol class="story-dots" aria-label="Faze">{dots}</ol><div class="story-cards">{story}</div></div>
-        <div class="story-stage" aria-hidden="true">{frames}<span class="story-count"><b data-story-num>01</b> / 07</span><span class="story-bar"></span></div>
-      </div>
+    <div class="story">
+      <div class="story-stage" aria-hidden="true">{frames}<span class="story-count"><b data-story-num>01</b> / 07</span><span class="story-bar"></span></div>
+      <ol class="story-steps">{story}</ol>
     </div>
     <p class="note"><a class="link-arrow" href="postupak.html">Detaljan postupak servisiranja {ARROW}</a></p>
   </div>
