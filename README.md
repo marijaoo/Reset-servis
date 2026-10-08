@@ -1,104 +1,111 @@
-# Reset servis — sajt servisa laptopova i računara
+# Sajt servisa laptopova i računara
 
-Kompletan sajt sa zakazivanjem servisa, praćenjem statusa popravke i administratorskim panelom.
-Radi na Node.js 22 bez ijedne dodatne biblioteke (baza je ugrađeni SQLite).
+Sajt sa zakazivanjem servisa, praćenjem statusa popravke i panelom za zaposlene.
+Radi na Node.js 22 bez ijedne dodatne biblioteke. Baza je ugrađeni SQLite (jedan fajl).
 
-## Šta sajt radi
+## Šta sistem radi
 
-| Za klijente | Za servis (panel na `/admin`) |
-|---|---|
-| Usluge, cene, kalkulator cene, postupak, česta pitanja | Lista svih naloga, pretraga i filteri po fazi |
-| Zakazivanje u 4 koraka, dobija broj naloga (npr. `RN-2026-7KQ4M`) | Novi zahtevi sa sajta stižu kao „Zakazan termin“ |
-| Stranica **Status popravke**: faza, dijagnoza, cena, rok | Otvaranje naloga na šalteru, štampa potvrde za klijenta |
-| Prijava za savete (e-pošta) | Promena faze jednim klikom; klijent odmah vidi novu fazu |
-| | Interne beleške, izvoz u CSV (Excel), lista pretplatnika |
+**Za klijente (javni sajt)**
+- Usluge i cene, posebna stranica za svaku uslugu, kalkulator cene, postupak, česta pitanja
+- Zakazivanje u 4 koraka, samo u slobodne termine; klijent dobija broj naloga i potvrdu e-poštom
+- Stranica Status popravke: faza, dijagnoza, cena, rok (bez imena i telefona)
+- Svetla i tamna tema, prilagođeno telefonu, pretraga sajta, prijava za savete
 
-Na javnoj stranici statusa nikada se ne prikazuju ime ni telefon klijenta.
+**Za firmu (panel na `/admin`)**
+- Nalozi: zahtevi sa sajta i nalozi sa šaltera, faze popravke, štampa potvrde, link za klijenta
+- Termini po danima
+- Sadržaj sajta: podaci o firmi, radno vreme, usluge i cene, česta pitanja, recenzije, logo i boje
+  (bez programera; svaka verzija se čuva i može da se vrati)
+- Korisnici sa ulogama: vlasnik, recepcija, serviser
+- Dnevnik: ko je, kada i šta menjao
+- E-poruke klijentima: potvrda zakazivanja, procena, uređaj spreman; obaveštenje servisu o novom zakazivanju
+- Automatske dnevne rezervne kopije, izvoz naloga u Excel (CSV)
 
-## Pre pokretanja: 3 koraka
+## Brzo pokretanje na svom računaru
 
-1. **Upišite podatke o servisu** u `config/site.json`: naziv, adresa, telefon, e-pošta, radno vreme, domen (`siteUrl`), PIB.
-   Ocene (`rating`), brojke (`stats`) i recenzije (`reviews`) zamenite pravim podacima ili ih obrišite (`[]` / `null`), pa se taj deo neće prikazivati.
-2. **Proverite usluge i cene** u `tools/data.py` (`SERVICES`, `prices`) i cene u kalkulatoru u `tools/build.py` (`CALC_ISSUES`).
-3. U `config/site.json` postavite **`"demo": false`** i pokrenite:
-
-   ```
-   python3 tools/build.py
-   ```
-
-   Time nestaju demo traka, oznake „probno“ i probni nalozi, a sajt postaje vidljiv pretraživačima.
-
-Pregledajte i `privatnost.html` (politika privatnosti je šablon; dopunite je podacima firme).
-
-## Pokretanje na svom računaru
-
-Potreban je Node.js 22.13 ili noviji (i Python 3, samo za `build.py`).
+Potreban je [Node.js 22](https://nodejs.org) (verzija 22.13 ili novija).
 
 ```
-ADMIN_PASSWORD=neka-lozinka npm start
+ADMIN_PASSWORD=neka-duga-lozinka npm start
 ```
 
-Sajt: http://localhost:3000 · Panel: http://localhost:3000/admin
+Na Windows-u (PowerShell): `$env:ADMIN_PASSWORD="neka-duga-lozinka"; npm start`
 
-Testovi: `npm test`
+- Sajt: http://localhost:3000
+- Panel: http://localhost:3000/admin, korisnik `admin`, lozinka iz `ADMIN_PASSWORD`
+
+Pri prvom pokretanju server pravi korisnika `admin`. Posle toga se lozinke menjaju u panelu.
+
+Testovi: `npm test` · Statična kopija sajta za pregled: `npm run build` (pravi folder `public/`)
 
 ## Postavljanje na internet
 
-Server čuva bazu u folderu `DATA_DIR`. Taj folder **mora biti trajan disk**, inače se nalozi brišu pri svakom restartu.
+Detaljno uputstvo, klik po klik: **[docs/POSTAVLJANJE.md](docs/POSTAVLJANJE.md)**
 
-### Render.com (najjednostavnije)
-1. Na render.com: **New → Blueprint**, izaberite ovaj GitHub repozitorijum (koristi `render.yaml`).
-2. Unesite `ADMIN_PASSWORD`. `SESSION_SECRET` se sam generiše, a disk za bazu je već podešen.
-3. U podešavanjima servisa dodajte svoj domen (Custom Domain); HTTPS je automatski.
+Ukratko:
+1. Render.com → New → Blueprint → ovaj repozitorijum (`render.yaml` sve podešava, uključujući disk za bazu).
+2. Upišite `ADMIN_PASSWORD` i podatke za slanje e-pošte.
+3. Dodajte domen i podesite DNS.
+4. U panelu, u kartici Sadržaj sajta, upišite prave podatke i isključite demo režim.
 
-Plan sa diskom je plaćen (oko 7 USD mesečno). Besplatan plan ne čuva bazu.
+Folder iz `DATA_DIR` mora biti na trajnom disku, inače se podaci brišu pri restartu.
 
-### Sopstveni server (VPS) sa Dockerom
-```
-docker build -t reset-servis .
-docker run -d --name reset -p 3000:3000 -v reset-data:/data \
-  -e ADMIN_PASSWORD=... -e SESSION_SECRET=... --restart unless-stopped reset-servis
-```
-Ispred postavite Caddy ili Nginx za HTTPS i domen (npr. Caddy: `vas-domen.rs { reverse_proxy localhost:3000 }`).
+## Promenljive okruženja
 
-### Promenljive okruženja
 | Naziv | Obavezno | Opis |
 |---|---|---|
-| `ADMIN_PASSWORD` | da | Lozinka za `/admin`. Bez nje je panel isključen. |
-| `SESSION_SECRET` | preporučeno | Dug nasumičan niz; bez njega se prijava u panel gubi pri restartu. |
-| `DATA_DIR` | ne | Folder za bazu (podrazumevano `./data`). |
-| `TRUST_PROXY` | iza proksija | `1` na Renderu, Railwayu ili iza Nginx/Caddy. |
-| `PORT` | ne | Podrazumevano 3000. |
-| `NOTIFY_WEBHOOK_URL` | ne | Adresa (npr. Slack, Discord ili Make/Zapier webhook) na koju stiže poruka o svakom novom zakazivanju. |
+| `ADMIN_PASSWORD` | pri prvom pokretanju | Lozinka za prvog korisnika `admin` |
+| `DATA_DIR` | ne | Folder za bazu, kopije i otpremljene slike (podrazumevano `./data`) |
+| `TRUST_PROXY` | iza proksija | `1` na Renderu i iza Nginx/Caddy (prava IP adresa i HTTPS) |
+| `PORT` | ne | Podrazumevano 3000 |
+| `PUBLIC_URL` | ne | Adresa za linkove u e-porukama, ako se razlikuje od one u panelu |
+| `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS` | za e-poštu | Podaci SMTP servera (npr. Brevo) |
+| `SMTP_SECURE` | ne | `starttls` (port 587, podrazumevano), `ssl` (port 465) ili `none` |
+| `MAIL_FROM` | za e-poštu | Pošiljalac, npr. `Reset servis <servis@vas-servis.rs>` |
+| `MAIL_REPLY_TO` | ne | Adresa na koju stižu odgovori klijenata |
+| `BACKUP_KEEP` | ne | Koliko dnevnih kopija se čuva (podrazumevano 14) |
+| `NOTIFY_WEBHOOK_URL` | ne | Slack/Discord/Make webhook za obaveštenje o novom zakazivanju |
 
 Primer je u `.env.example`.
 
-## Svakodnevni rad
+## Uloge u panelu
 
-1. Klijent zakaže na sajtu → u panelu se pojavi nalog „Zakazan termin“ (filter **Zakazani**). Pozovite ga da potvrdite termin.
-2. Kada donese uređaj, otvorite nalog i kliknite fazu **Primljen u servis**, pa **Štampaj potvrdu**.
-   Ako dođe bez zakazivanja: **+ Novi nalog**.
-3. Kako popravka napreduje, kliknite odgovarajuću fazu i upišite dijagnozu, cenu i rok, pa **Sačuvaj**.
-   Klijent sve to vidi na stranici Status popravke (link: **Kopiraj link za klijenta**, može se poslati SMS-om ili Viberom).
-4. Kada je gotovo: **Spreman za preuzimanje**, a po preuzimanju **Preuzet**.
+| Može | Vlasnik | Recepcija | Serviser |
+|---|:-:|:-:|:-:|
+| Vidi naloge i termine | ✓ | ✓ | ✓ |
+| Menja fazu, dijagnozu, cenu, rok, beleške | ✓ | ✓ | ✓ |
+| Otvara naloge, menja podatke klijenta | ✓ | ✓ | |
+| Vidi pretplatnike | ✓ | ✓ | |
+| Briše naloge, izvozi CSV | ✓ | | |
+| Menja sadržaj sajta, korisnike, e-poštu | ✓ | | |
+| Dnevnik i rezervne kopije | ✓ | | |
 
-## Rezervna kopija
+## Bezbednost
 
-Cela baza je jedan fajl: `DATA_DIR/reset.db`. Kopirajte ga redovno (npr. jednom dnevno).
-Za brzi pregled podataka u Excelu koristite **Izvoz CSV** u panelu.
+- Lozinke: scrypt; sesije u bazi (12 h), odjava sa svih uređaja pri promeni lozinke ili deaktivaciji
+- Kolačić `HttpOnly`, `SameSite=Strict`, `Secure` na HTTPS-u; izmene u panelu traže posebno zaglavlje
+- Ograničenje broja pokušaja: prijava, zakazivanje, provera statusa, prijava za savete
+- Sav sadržaj iz panela se escapuje pri generisanju stranica; otpremaju se samo prave slike (PNG, JPG, WebP, do 3 MB)
+- Bezbednosna zaglavlja: CSP, HSTS, X-Frame-Options, nosniff; zaštita od CSV formula u izvozu
+- Javni status prikazuje samo uređaj, kvar, dijagnozu, cenu i fazu
+
+## Rezervne kopije
+
+Server jednom dnevno pravi kopiju baze u `DATA_DIR/backups` i čuva poslednjih 14.
+Vlasnik ih preuzima u panelu (kartica Rezervne kopije). Preuzmite kopiju bar jednom nedeljno i čuvajte je van servera.
+
+**Vraćanje kopije:** zaustavite server, zamenite `DATA_DIR/reset.db` preuzetom kopijom
+(obrišite `reset.db-wal` i `reset.db-shm` ako postoje), pa ponovo pokrenite server.
 
 ## Struktura
 
 ```
-config/site.json      podaci o servisu i demo prekidač
-tools/data.py         usluge, cene, faze, česta pitanja
-tools/build.py        generiše sve .html stranice (pokrenuti posle svake izmene)
-tools/illus.py        crteži
-assets/               stil, skripte, ikonica, slika za deljenje
-server/server.js      server i API
-server/admin/         administratorski panel
-test/                 automatski testovi servera
+config/content.json     početni sadržaj sajta (posle prvog pokretanja sadržaj je u bazi)
+server/server.js        server i API
+server/lib/             baza, prijava i uloge, e-pošta, termini, rezervne kopije
+server/render/          generator stranica i crteži
+server/admin/           panel
+assets/                 stil i skripte sajta, ikonica, slika za deljenje
+test/                   automatski testovi (npm test)
+docs/                   uputstva i šabloni dokumenata
 ```
-
-Izmene sadržaja: menjajte `config/site.json` ili `tools/*.py`, pa pokrenite `python3 tools/build.py`.
-Ne menjajte `.html` fajlove ručno, jer ih `build.py` prepisuje.
