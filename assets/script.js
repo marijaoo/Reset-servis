@@ -490,33 +490,52 @@
   if (wz) {
     var stepNo = 1, total = 4, sending = false;
     var pad = function (n) { return String(n).padStart(2, '0'); };
-    var days = $('[data-days]'), timesEl = $('[data-times]');
+    var days = $('[data-days]'), timesEl = $('[data-times]'), slotNote = $('[data-slot-note]');
+    var slotData = null; // termini sa servera: [{date, label, times:[{t, free}]}]
     var renderTimes = function () {
-      var chosen = wz.querySelector('[name=wz-day]:checked'), dow = chosen ? +chosen.getAttribute('data-dow') : 1;
-      var hh = RS.hours && RS.hours[dow], html = '';
-      if (hh) {
-        var toMin = function (t) { var x = t.split(':'); return +x[0] * 60 + +x[1]; };
-        for (var m = toMin(hh[0]); m <= toMin(hh[1]) - 60; m += 60) {
-          var lab = pad(Math.floor(m / 60)) + ':' + pad(m % 60);
-          html += '<label><input type="radio" name="wz-time" value="' + lab + '"' + (html ? '' : ' checked') + '><span>' + lab + '</span></label>';
+      var chosen = wz.querySelector('[name=wz-day]:checked'), html = '';
+      if (slotData) {
+        var day = chosen && slotData.filter(function (d) { return d.date === chosen.value; })[0];
+        (day ? day.times : []).forEach(function (x, i) {
+          html += '<label><input type="radio" name="wz-time" value="' + x.t + '"' + (i ? '' : ' checked') + '><span>' + x.t + '</span></label>';
+        });
+      } else {
+        var dow = chosen ? +chosen.getAttribute('data-dow') : 1, hh = RS.hours && RS.hours[dow];
+        if (hh) {
+          var toMin = function (t) { var x = t.split(':'); return +x[0] * 60 + +x[1]; };
+          for (var m = toMin(hh[0]); m <= toMin(hh[1]) - 60; m += 60) {
+            var lab = pad(Math.floor(m / 60)) + ':' + pad(m % 60);
+            html += '<label><input type="radio" name="wz-time" value="' + lab + '"' + (html ? '' : ' checked') + '><span>' + lab + '</span></label>';
+          }
         }
       }
       timesEl.innerHTML = html;
     };
-    if (days) {
-      var d0 = new Date(), added = 0, html = '';
-      for (var i = 1; added < 6 && i < 21; i++) {
-        var dt = new Date(d0.getFullYear(), d0.getMonth(), d0.getDate() + i);
-        if (!(RS.hours && RS.hours[dt.getDay()])) continue;
-        var lab = DAYS[dt.getDay()] + ' ' + dt.getDate() + '.' + (dt.getMonth() + 1) + '.';
-        var iso = dt.getFullYear() + '-' + pad(dt.getMonth() + 1) + '-' + pad(dt.getDate());
-        html += '<label><input type="radio" name="wz-day" value="' + iso + '" data-label="' + lab + '" data-dow="' + dt.getDay() + '"' + (added === 0 ? ' checked' : '') + '><span>' + lab + '</span></label>';
-        added++;
+    var renderDays = function () {
+      var html = '';
+      if (slotData) {
+        slotData.slice(0, 10).forEach(function (d, i) {
+          html += '<label><input type="radio" name="wz-day" value="' + d.date + '" data-label="' + esc(d.label) + '"' + (i ? '' : ' checked') + '><span>' + esc(d.label) + '</span></label>';
+        });
+        if (!slotData.length && slotNote) slotNote.textContent = 'Trenutno nema slobodnih termina preko sajta. Pozovite nas ili dođite bez zakazivanja.';
+      } else {
+        var d0 = new Date(), added = 0;
+        for (var i = 1; added < 6 && i < 21; i++) {
+          var dt = new Date(d0.getFullYear(), d0.getMonth(), d0.getDate() + i);
+          if (!(RS.hours && RS.hours[dt.getDay()])) continue;
+          var lab = DAYS[dt.getDay()] + ' ' + dt.getDate() + '.' + (dt.getMonth() + 1) + '.';
+          var iso = dt.getFullYear() + '-' + pad(dt.getMonth() + 1) + '-' + pad(dt.getDate());
+          html += '<label><input type="radio" name="wz-day" value="' + iso + '" data-label="' + lab + '" data-dow="' + dt.getDay() + '"' + (added === 0 ? ' checked' : '') + '><span>' + lab + '</span></label>';
+          added++;
+        }
       }
       days.innerHTML = html;
-      days.addEventListener('change', renderTimes);
       renderTimes();
-    }
+    };
+    var loadSlots = function () {
+      return api('GET', 'slots').then(function (r) { if (r.ok && r.data && Array.isArray(r.data.days)) slotData = r.data.days; renderDays(); });
+    };
+    if (days) { days.addEventListener('change', renderTimes); renderDays(); loadSlots(); }
     var val = function (n) { var el = wz.querySelector('[name=' + n + ']:checked'); return el ? el.value : ''; };
     var dayLabel = function () { var el = wz.querySelector('[name=wz-day]:checked'); return el ? el.getAttribute('data-label') : ''; };
     var collect = function () {
@@ -564,6 +583,8 @@
           finish('<p class="eyebrow">Zahtev je primljen</p><h3 style="font-size:1.6rem">Hvala, ' + esc(d.name.split(' ')[0]) + '!</h3>' +
             '<p class="lead">Javićemo vam se da potvrdimo termin. Vaš broj naloga je:</p><div class="wz-code">' + esc(r.data.code) + '</div>' +
             '<p class="note">Sačuvajte ga. Sa njim pratite popravku na stranici <a class="link-arrow" href="status.html#' + esc(r.data.code) + '">Status popravke</a>.</p>' + sum);
+        } else if (r.status === 409) {
+          loadSlots().then(function () { stepNo = 3; render(); if (slotNote) slotNote.textContent = r.data.error; });
         } else if (r.status === 400 || r.status === 429) {
           errEl.textContent = r.data.error || 'Proverite unete podatke.'; errEl.hidden = false; render();
         } else if (RS.demo) {

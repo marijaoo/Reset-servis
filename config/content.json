@@ -1,0 +1,815 @@
+{
+  "demo": true,
+  "siteUrl": "https://www.vas-domen.rs",
+  "business": {
+    "name": "Reset servis",
+    "legalName": "Reset servis d.o.o.",
+    "pib": "",
+    "maticniBroj": "",
+    "warranty": "6 meseci"
+  },
+  "contact": {
+    "street": "Bulevar kralja Aleksandra 000",
+    "postal": "11000",
+    "city": "Beograd",
+    "phone": "+381 11 000 0000",
+    "mobile": "+381 60 000 0000",
+    "email": "servis@primer.rs",
+    "mapUrl": "https://www.openstreetmap.org/#map=15/44.8040/20.4790",
+    "directions": "Primer lokacije: blizu Vukovog spomenika, linije 7, 12 i 14. Parking u okolnim ulicama (zona 2)."
+  },
+  "hours": {
+    "weekdays": [
+      "09:00",
+      "19:00"
+    ],
+    "saturday": [
+      "10:00",
+      "15:00"
+    ],
+    "sunday": null
+  },
+  "brand": {
+    "accent": "#0b6e8a",
+    "accentDark": "#4cb8d6",
+    "logo": "",
+    "mark": "R/"
+  },
+  "home": {
+    "heroTitle1": "Vaš laptop.",
+    "heroAccent": "Kao nov.",
+    "heroTitle2": "Već sutra.",
+    "heroLead": "Besplatna dijagnostika, tačna cena pre popravke i 6 meseci garancije. Većinu kvarova rešavamo za 24 do 72 sata, uz test pod opterećenjem pre nego što vam vratimo uređaj."
+  },
+  "analytics": {
+    "plausibleDomain": ""
+  },
+  "booking": {
+    "slotMinutes": 60,
+    "perSlot": 2,
+    "horizonDays": 14,
+    "minNoticeHours": 2,
+    "blockedDates": []
+  },
+  "notifications": {
+    "staffEmails": [],
+    "customerOnBooking": true,
+    "customerOnEstimate": true,
+    "customerOnReady": true
+  },
+  "rating": {
+    "value": "4,9",
+    "count": "2.400+ popravki"
+  },
+  "stats": [
+    {
+      "value": 2400,
+      "suffix": "+",
+      "label": "popravljenih uređaja"
+    },
+    {
+      "value": 24,
+      "suffix": "h",
+      "label": "prosečan rok za čišćenje i sistem"
+    },
+    {
+      "value": 6,
+      "suffix": "mes.",
+      "label": "garancija na rad i delove"
+    },
+    {
+      "value": 98,
+      "suffix": "%",
+      "label": "popravki bez zamene ploče"
+    }
+  ],
+  "reviews": [
+    {
+      "initials": "MJ",
+      "name": "Milica J.",
+      "place": "Vračar",
+      "text": "Laptop se gasio usred rada. Sutradan je bio gotov, tih i hladan. Dobila sam i fotografije pre i posle čišćenja."
+    },
+    {
+      "initials": "NP",
+      "name": "Nikola P.",
+      "place": "Novi Beograd",
+      "text": "Prosuo sam kafu na tastaturu u ponedeljak. U sredu je laptop radio, a podaci su ostali netaknuti."
+    },
+    {
+      "initials": "AS",
+      "name": "Ana S.",
+      "place": "Zvezdara",
+      "text": "Jasna procena pre popravke i tačno ta cena na računu. Tako treba da izgleda servis."
+    },
+    {
+      "initials": "DM",
+      "name": "Dušan M.",
+      "place": "Zemun",
+      "text": "Ugradili su SSD i prebacili ceo sistem. Stari računar se sada pali za desetak sekundi."
+    },
+    {
+      "initials": "JK",
+      "name": "Jelena K.",
+      "place": "Voždovac",
+      "text": "Za našu kancelariju održavaju 8 računara. Kad nešto stane, dođu isti dan."
+    },
+    {
+      "initials": "SR",
+      "name": "Stefan R.",
+      "place": "Palilula",
+      "text": "Zamenili su konektor za punjenje umesto cele ploče. Platio sam trećinu cene koju su mi drugde tražili."
+    }
+  ],
+  "brands": [
+    "Lenovo",
+    "Dell",
+    "HP",
+    "ASUS",
+    "Acer",
+    "Apple MacBook",
+    "MSI",
+    "Samsung",
+    "Huawei",
+    "Microsoft Surface",
+    "Razer",
+    "Toshiba"
+  ],
+  "services": [
+    {
+      "slug": "popravka-laptopova",
+      "icon": "laptop",
+      "title": "Popravka laptopova",
+      "short": "Ne pali se, ne puni, gasi se, ne prikazuje sliku. Kvarovi matične ploče, napajanja i šarki.",
+      "long": "Laptop koji ne pali, ne puni bateriju ili se sam gasi najčešće ima kvar na napajanju ili matičnoj ploči. Prvo merimo napone i tražimo tačno koja komponenta ne radi, pa menjamo samo ono što je zaista neispravno.",
+      "time": "1–5 dana",
+      "symptoms": [
+        "Ne pali se ili se upali pa odmah ugasi",
+        "Ne puni bateriju ili punjač ne radi",
+        "Ventilator radi, ali nema slike",
+        "Šarke škripe, pucaju ili se kućište otvara",
+        "Sam se restartuje ili zaledi"
+      ],
+      "included": [
+        "Merenje napona i dijagnostika ploče",
+        "Zamena neispravne komponente",
+        "Provera baterije i punjača",
+        "Test od 2 sata pod opterećenjem",
+        "Garantni list na 6 meseci"
+      ],
+      "prices": [
+        {
+          "name": "Zamena baterije (sa delom)",
+          "min": 3000,
+          "max": 6000
+        },
+        {
+          "name": "Zamena šarki",
+          "min": 4000,
+          "max": 7500
+        },
+        {
+          "name": "Popravka napajanja na ploči",
+          "min": 6000,
+          "max": 12000
+        },
+        {
+          "name": "Zamena matične ploče (sa delom)",
+          "min": 12000,
+          "max": 35000
+        }
+      ],
+      "related": [
+        "ciscenje-i-pasta",
+        "lemljenje-i-bga",
+        "ekrani-i-tastature"
+      ],
+      "image": ""
+    },
+    {
+      "slug": "servis-racunara",
+      "icon": "pc",
+      "title": "Servis desktop računara",
+      "short": "Dijagnostika kvarova, zamena napajanja, matične ploče i grafičke kartice, sklapanje po meri.",
+      "long": "Kod desktop računara kvar je najčešće u napajanju, disku ili memoriji. Testiramo svaku komponentu posebno i predlažemo zamenu koja odgovara vašoj konfiguraciji i budžetu. Sklapamo i nove računare po meri, za kancelariju ili igranje.",
+      "time": "1–3 dana",
+      "symptoms": [
+        "Računar ne reaguje na dugme za paljenje",
+        "Pišti pri paljenju ili nema slike",
+        "Gasi se tokom igranja ili rada",
+        "Plavi ekran i česti restarti",
+        "Glasan rad i visoke temperature"
+      ],
+      "included": [
+        "Test napajanja, memorije i diska",
+        "Čišćenje kućišta i hladnjaka",
+        "Zamena komponente po vašem izboru",
+        "Ažuriranje BIOS-a i drajvera",
+        "Stres test procesora i grafike"
+      ],
+      "prices": [
+        {
+          "name": "Dijagnostika kvara",
+          "min": 1500,
+          "max": 3000
+        },
+        {
+          "name": "Čišćenje kućišta i hladnjaka",
+          "min": 2500,
+          "max": 4000
+        },
+        {
+          "name": "Sklapanje po meri (rad)",
+          "min": 3000,
+          "max": 5000
+        },
+        {
+          "name": "Zamena napajanja (sa delom)",
+          "min": 6000,
+          "max": 14000
+        }
+      ],
+      "related": [
+        "nadogradnja",
+        "podaci-i-sistem",
+        "ciscenje-i-pasta"
+      ],
+      "image": ""
+    },
+    {
+      "slug": "ciscenje-i-pasta",
+      "icon": "fan",
+      "title": "Čišćenje i termalna pasta",
+      "short": "Laptop se greje, ventilator je glasan ili se računar gasi pri opterećenju.",
+      "long": "Prašina u ventilatoru i osušena termalna pasta podižu temperaturu procesora i do 25 °C. Laptop tada usporava, bučan je i može da se gasi. Rastavljamo uređaj, čistimo ventilator i hladnjak i nanosimo kvalitetnu termalnu pastu.",
+      "time": "24 h",
+      "symptoms": [
+        "Ventilator je stalno glasan",
+        "Kućište je vruće na dodir",
+        "Laptop usporava posle nekoliko minuta rada",
+        "Gasi se tokom igranja ili renderovanja",
+        "Poslednje čišćenje bilo je pre više od 2 godine"
+      ],
+      "included": [
+        "Kompletno rastavljanje uređaja",
+        "Čišćenje ventilatora i rebara hladnjaka",
+        "Nova termalna pasta (i termo podloge po potrebi)",
+        "Merenje temperature pre i posle",
+        "Podmazivanje ventilatora"
+      ],
+      "prices": [
+        {
+          "name": "Desktop računar",
+          "min": 2500,
+          "max": 4000
+        },
+        {
+          "name": "Standardni laptop",
+          "min": 3500,
+          "max": 4500
+        },
+        {
+          "name": "MacBook",
+          "min": 4500,
+          "max": 6000
+        },
+        {
+          "name": "Gejming laptop",
+          "min": 5500,
+          "max": 7500
+        }
+      ],
+      "related": [
+        "popravka-laptopova",
+        "nadogradnja",
+        "servis-racunara"
+      ],
+      "beforeAfter": {
+        "label": "Temperatura procesora pod opterećenjem",
+        "unit": "°C",
+        "before": 96,
+        "after": 71,
+        "scale": 110
+      },
+      "compare": true,
+      "image": ""
+    },
+    {
+      "slug": "ekrani-i-tastature",
+      "icon": "screen",
+      "title": "Ekrani i tastature",
+      "short": "Zamena ekrana, tastature, touchpada, kućišta i šarki.",
+      "long": "Napukao ekran, linije na slici, tamna slika ili tasteri koji ne rade rešavaju se zamenom dela. Proveravamo tačan model panela ili tastature, poručujemo odgovarajući deo i ugrađujemo ga, najčešće za jedan do tri dana.",
+      "time": "1–3 dana",
+      "symptoms": [
+        "Napukao ili razbijen ekran",
+        "Linije, fleke ili treperenje slike",
+        "Slika je jedva vidljiva (pozadinsko svetlo)",
+        "Pojedini tasteri ne rade",
+        "Touchpad ne reaguje"
+      ],
+      "included": [
+        "Provera tačnog modela dela",
+        "Nabavka novog panela ili tastature",
+        "Ugradnja i podešavanje",
+        "Provera kamere, mikrofona i Wi-Fi antena",
+        "Garancija 6 meseci na deo i rad"
+      ],
+      "prices": [
+        {
+          "name": "Zamena touchpada",
+          "min": 4000,
+          "max": 7000
+        },
+        {
+          "name": "Zamena tastature",
+          "min": 4900,
+          "max": 9000
+        },
+        {
+          "name": "Ekran HD (sa delom)",
+          "min": 9900,
+          "max": 13000
+        },
+        {
+          "name": "Ekran Full HD IPS (sa delom)",
+          "min": 12000,
+          "max": 18000
+        }
+      ],
+      "related": [
+        "popravka-laptopova",
+        "prosuta-tecnost",
+        "lemljenje-i-bga"
+      ],
+      "image": ""
+    },
+    {
+      "slug": "podaci-i-sistem",
+      "icon": "disk",
+      "title": "Podaci i sistem",
+      "short": "Instalacija Windows-a, uklanjanje virusa, prebacivanje i spasavanje podataka.",
+      "long": "Spor sistem, virusi ili disk koji otkazuje ne moraju da znače gubitak fajlova. Pravimo kopiju vaših podataka, čistimo ili ponovo instaliramo sistem i vraćamo fajlove tamo gde su bili. Ako disk ne radi, pokušavamo da spasemo podatke.",
+      "time": "isti dan",
+      "symptoms": [
+        "Windows se sporo pokreće ili se ne pokreće",
+        "Iskaču reklame i nepoznati programi",
+        "Disk škripi ili se ne vidi",
+        "Slučajno obrisani fajlovi",
+        "Prelazak na novi računar"
+      ],
+      "included": [
+        "Rezervna kopija podataka pre rada",
+        "Instalacija i aktivacija sistema",
+        "Drajveri i osnovni programi",
+        "Vraćanje fajlova i podešavanja",
+        "Provera stanja diska"
+      ],
+      "prices": [
+        {
+          "name": "Prebacivanje podataka",
+          "min": 1500,
+          "max": 3000
+        },
+        {
+          "name": "Uklanjanje virusa",
+          "min": 2000,
+          "max": 3500
+        },
+        {
+          "name": "Instalacija Windows-a",
+          "min": 2500,
+          "max": 3500
+        },
+        {
+          "name": "Spasavanje podataka sa oštećenog diska",
+          "min": 5000,
+          "max": 20000
+        }
+      ],
+      "related": [
+        "nadogradnja",
+        "servis-racunara",
+        "popravka-laptopova"
+      ],
+      "image": ""
+    },
+    {
+      "slug": "nadogradnja",
+      "icon": "chip",
+      "title": "Nadogradnja",
+      "short": "Ugradnja SSD diska i dodatne RAM memorije. Stari računar postaje primetno brži.",
+      "long": "Najisplativija nadogradnja starijeg računara je SSD disk. Sistem se pokreće nekoliko puta brže, a programi se otvaraju odmah. Prebacujemo ceo sistem sa starog diska, tako da sve ostaje kako je bilo, samo brže.",
+      "time": "isti dan",
+      "symptoms": [
+        "Sistem se pokreće duže od jednog minuta",
+        "Programi se dugo otvaraju",
+        "Računar koči kad je otvoreno više kartica",
+        "Pun disk i stalna upozorenja",
+        "Računar je stariji od 4 godine"
+      ],
+      "included": [
+        "Savet koji deo odgovara vašem uređaju",
+        "Kloniranje sistema na novi disk",
+        "Ugradnja SSD-a i RAM memorije",
+        "Provera brzine pre i posle",
+        "Stari disk vraćamo vama"
+      ],
+      "prices": [
+        {
+          "name": "Kloniranje sistema",
+          "min": 1500,
+          "max": 2500
+        },
+        {
+          "name": "Ugradnja SSD-a (samo rad)",
+          "min": 2000,
+          "max": 2500
+        },
+        {
+          "name": "RAM 8 GB sa ugradnjom",
+          "min": 4500,
+          "max": 6500
+        },
+        {
+          "name": "SSD 500 GB sa ugradnjom",
+          "min": 6500,
+          "max": 9000
+        }
+      ],
+      "related": [
+        "podaci-i-sistem",
+        "ciscenje-i-pasta",
+        "servis-racunara"
+      ],
+      "beforeAfter": {
+        "label": "Vreme pokretanja sistema",
+        "unit": "s",
+        "before": 58,
+        "after": 12,
+        "scale": 70
+      },
+      "image": ""
+    },
+    {
+      "slug": "prosuta-tecnost",
+      "icon": "drop",
+      "title": "Prosuta tečnost",
+      "short": "Hitno čišćenje matične ploče od korozije i procena oštećenja.",
+      "long": "Voda, kafa ili sok na tastaturi izazivaju koroziju koja se širi danima. Što pre donesete laptop, veća je šansa da se popravi jeftino. Rastavljamo ga, čistimo ploču u ultrazvučnoj kadi i menjamo samo oštećene delove.",
+      "time": "2–5 dana",
+      "symptoms": [
+        "Prosuta voda, kafa, čaj ili sok",
+        "Tasteri lepe ili ne rade",
+        "Laptop se ugasio odmah posle prosipanja",
+        "Pali se, ali se čudno ponaša",
+        "Zelene ili bele naslage u portovima"
+      ],
+      "included": [
+        "Hitno rastavljanje istog dana",
+        "Čišćenje ploče u ultrazvučnoj kadi",
+        "Sušenje i provera svih napona",
+        "Zamena oštećenih komponenti",
+        "Pismena procena pre popravke"
+      ],
+      "prices": [
+        {
+          "name": "Čišćenje ploče ultrazvukom",
+          "min": 4500,
+          "max": 6500
+        },
+        {
+          "name": "Zamena tastature posle prosipanja",
+          "min": 5000,
+          "max": 9000
+        },
+        {
+          "name": "Popravka oštećenih komponenti",
+          "min": 6000,
+          "max": 15000
+        }
+      ],
+      "related": [
+        "ekrani-i-tastature",
+        "lemljenje-i-bga",
+        "popravka-laptopova"
+      ],
+      "tips": [
+        "Odmah isključite laptop i izvucite punjač.",
+        "Ne pokušavajte da ga upalite da proverite da li radi.",
+        "Okrenite ga naopako, otvorenog ekrana, da tečnost iscuri.",
+        "Ne sušite ga fenom. Donesite ga u servis što pre."
+      ],
+      "image": ""
+    },
+    {
+      "slug": "lemljenje-i-bga",
+      "icon": "bolt",
+      "title": "Lemljenje i BGA",
+      "short": "Zamena konektora za punjenje, čipova i komponenti na matičnoj ploči.",
+      "long": "Polomljen konektor za punjenje ili neispravan čip ne znače kraj laptopa. Mikrolemljenjem menjamo pojedinačne komponente na matičnoj ploči, umesto da menjamo celu ploču, što je obično nekoliko puta jeftinije.",
+      "time": "3–7 dana",
+      "symptoms": [
+        "Punjač radi samo pod određenim uglom",
+        "USB ili HDMI port je polomljen",
+        "Laptop ne pali posle udara struje",
+        "Grafički čip pravi artefakte na slici",
+        "Servis je ponudio zamenu cele ploče"
+      ],
+      "included": [
+        "Pregled ploče pod mikroskopom",
+        "Zamena konektora i portova",
+        "Zamena SMD komponenti i čipova",
+        "BGA reballing na profesionalnoj stanici",
+        "Provera napona posle popravke"
+      ],
+      "prices": [
+        {
+          "name": "Zamena USB ili HDMI porta",
+          "min": 5000,
+          "max": 8000
+        },
+        {
+          "name": "Zamena konektora za punjenje",
+          "min": 6000,
+          "max": 9000
+        },
+        {
+          "name": "Reballing ili zamena čipa",
+          "min": 12000,
+          "max": 25000
+        }
+      ],
+      "related": [
+        "popravka-laptopova",
+        "prosuta-tecnost",
+        "servis-racunara"
+      ],
+      "image": ""
+    },
+    {
+      "slug": "poslovni-korisnici",
+      "icon": "shield",
+      "title": "Poslovni korisnici",
+      "short": "Održavanje računara za firme, prioritetni rokovi i mesečno fakturisanje.",
+      "long": "Za kancelarije i male firme preuzimamo redovno održavanje računara i mreže. Dobijate prioritet u servisu, dolazak na lokaciju u Beogradu i jedan mesečni račun umesto pojedinačnih popravki.",
+      "time": "po ugovoru",
+      "symptoms": [
+        "Imate 3 ili više računara u kancelariji",
+        "Zastoji u radu vas koštaju",
+        "Nemate svog IT stručnjaka",
+        "Potrebne su vam redovne rezervne kopije",
+        "Otvarate novu kancelariju"
+      ],
+      "included": [
+        "Prioritetni rok popravke",
+        "Dolazak na lokaciju u Beogradu",
+        "Redovno čišćenje i ažuriranje",
+        "Postavljanje novih radnih mesta",
+        "Mesečni izveštaj i jedna faktura"
+      ],
+      "prices": [
+        {
+          "name": "Intervencija na lokaciji",
+          "min": 3000,
+          "max": 5000
+        },
+        {
+          "name": "Postavljanje nove radne stanice",
+          "min": 3500,
+          "max": 6000
+        },
+        {
+          "name": "Mesečno održavanje do 10 računara",
+          "min": 15000,
+          "max": 25000
+        }
+      ],
+      "related": [
+        "servis-racunara",
+        "podaci-i-sistem",
+        "nadogradnja"
+      ],
+      "image": ""
+    }
+  ],
+  "steps": [
+    {
+      "title": "Prijava kvara",
+      "short": "Prijava",
+      "time": "Odmah",
+      "text": "Pozovete nas, popunite formu na sajtu ili jednostavno donesete uređaj. Zakazivanje nije potrebno. Za firme i veće količine dolazimo po uređaje na adresu u Beogradu.",
+      "tags": [
+        "Telefon, Viber ili forma na sajtu",
+        "Bez zakazivanja"
+      ]
+    },
+    {
+      "title": "Prijem i radni nalog",
+      "short": "Prijem",
+      "time": "10 minuta",
+      "text": "Zajedno pregledamo uređaj i zapišemo spoljašnje stanje, opis kvara i pribor koji ostavljate. Dobijate radni nalog sa brojem po kojem pratite status.",
+      "tags": [
+        "Zapisnik o stanju uređaja",
+        "Broj radnog naloga, npr. RN-2026-0417"
+      ]
+    },
+    {
+      "title": "Dijagnostika",
+      "short": "Dijagnostika",
+      "time": "Isti ili sledeći dan",
+      "text": "Serviser rastavlja i testira uređaj da bi pronašao pravi uzrok kvara. Dijagnostika je besplatna ako popravku radite kod nas.",
+      "tags": [
+        "Merenje napona i temperatura",
+        "Test diska, memorije i ekrana"
+      ]
+    },
+    {
+      "title": "Procena i vaše odobrenje",
+      "short": "Procena",
+      "time": "Poziv ili SMS",
+      "text": "Javljamo vam šta je neispravno, koliko košta popravka i koliko traje. Ništa ne radimo dok ne odobrite. Ako odustanete, uređaj preuzimate u istom stanju.",
+      "tags": [
+        "Tačna cena pre početka rada",
+        "Bez skrivenih troškova"
+      ]
+    },
+    {
+      "title": "Popravka",
+      "short": "Popravka",
+      "time": "Obično 24–72 h",
+      "text": "Menjamo ili popravljamo neispravne delove. Ako deo treba poručiti, javljamo vam tačan rok isporuke.",
+      "tags": [
+        "Originalni ili provereni zamenski delovi",
+        "Antistatičko radno mesto"
+      ]
+    },
+    {
+      "title": "Testiranje",
+      "short": "Test",
+      "time": "Najmanje 2 sata",
+      "text": "Svaki uređaj prolazi test pod opterećenjem: temperature, napajanje, ekran, tastatura, portovi, mreža i zvuk.",
+      "tags": [
+        "Stres test procesora i grafike",
+        "Provera svih portova"
+      ]
+    },
+    {
+      "title": "Preuzimanje i garancija",
+      "short": "Preuzimanje",
+      "time": "Kad vam odgovara",
+      "text": "Pozivamo vas kad je uređaj spreman. Plaćate gotovinom ili karticom i dobijate fiskalni račun i garantni list na 6 meseci.",
+      "tags": [
+        "Fiskalni račun",
+        "Garancija 6 meseci"
+      ]
+    }
+  ],
+  "faq": [
+    {
+      "group": "Dijagnostika i cene",
+      "items": [
+        {
+          "q": "Koliko košta dijagnostika?",
+          "a": "Dijagnostika je besplatna ako popravku radite kod nas. Ako odustanete od popravke, naplaćujemo 1.500 RSD."
+        },
+        {
+          "q": "Da li ću znati cenu pre popravke?",
+          "a": "Da. Posle dijagnostike vas pozovemo i kažemo tačnu cenu i rok. Ništa ne radimo bez vašeg odobrenja."
+        },
+        {
+          "q": "Kako mogu da platim?",
+          "a": "Gotovinom, platnim karticama ili uplatom na račun za pravna lica. Dobijate fiskalni račun."
+        }
+      ]
+    },
+    {
+      "group": "Rokovi i garancija",
+      "items": [
+        {
+          "q": "Koliko traje popravka?",
+          "a": "Čišćenje, instalacija sistema i ugradnja SSD-a obično su gotovi isti ili sledeći dan. Zamena ekrana i delova traje 1 do 3 dana, a složenije popravke matične ploče do 7 dana."
+        },
+        {
+          "q": "Koliko traje garancija?",
+          "a": "Na rad i ugrađene delove dajemo 6 meseci garancije. Garancija ne važi za nova mehanička oštećenja i prosutu tečnost."
+        },
+        {
+          "q": "Da li postoji hitna popravka?",
+          "a": "Da, za većinu usluga možemo da završimo posao isti dan uz doplatu od 30%, ako je deo na stanju."
+        }
+      ]
+    },
+    {
+      "group": "Podaci i uređaji",
+      "items": [
+        {
+          "q": "Da li ću izgubiti podatke?",
+          "a": "Kod većine popravki podaci ostaju netaknuti. Ako je potrebna reinstalacija ili zamena diska, pre toga vas pitamo i nudimo prebacivanje podataka."
+        },
+        {
+          "q": "Da li popravljate MacBook računare?",
+          "a": "Da. Radimo čišćenje, zamenu baterije, tastature i SSD nadogradnju na modelima gde je to moguće."
+        },
+        {
+          "q": "Mogu li da pratim status popravke?",
+          "a": "Da. Pozovite nas ili pošaljite broj radnog naloga, pa ćemo vam reći u kom je koraku popravka."
+        },
+        {
+          "q": "Šta ako se popravka ne isplati?",
+          "a": "Iskreno vam kažemo ako je popravka skuplja od vrednosti uređaja. Možemo da spasemo podatke i predložimo zamenu."
+        }
+      ]
+    }
+  ],
+  "calc": {
+    "devices": [
+      {
+        "key": "laptop",
+        "label": "Laptop",
+        "factor": 1.0
+      },
+      {
+        "key": "gaming",
+        "label": "Gejming laptop",
+        "factor": 1.25
+      },
+      {
+        "key": "mac",
+        "label": "MacBook",
+        "factor": 1.35
+      },
+      {
+        "key": "desktop",
+        "label": "Desktop",
+        "factor": 0.85
+      }
+    ],
+    "issues": [
+      {
+        "key": "ciscenje",
+        "label": "Pregrevanje, čišćenje i pasta",
+        "min": 3500,
+        "max": 4500,
+        "time": "24 h",
+        "service": "ciscenje-i-pasta"
+      },
+      {
+        "key": "ekran",
+        "label": "Zamena ekrana",
+        "min": 9900,
+        "max": 15000,
+        "time": "1–3 dana",
+        "service": "ekrani-i-tastature"
+      },
+      {
+        "key": "ne-pali",
+        "label": "Ne pali se / ne puni",
+        "min": 4000,
+        "max": 12000,
+        "time": "1–5 dana",
+        "service": "popravka-laptopova"
+      },
+      {
+        "key": "tecnost",
+        "label": "Prosuta tečnost",
+        "min": 4500,
+        "max": 9000,
+        "time": "2–5 dana",
+        "service": "prosuta-tecnost"
+      },
+      {
+        "key": "sistem",
+        "label": "Instalacija sistema i virusi",
+        "min": 2500,
+        "max": 3500,
+        "time": "isti dan",
+        "service": "podaci-i-sistem"
+      },
+      {
+        "key": "ssd",
+        "label": "SSD nadogradnja (sa diskom)",
+        "min": 6500,
+        "max": 9000,
+        "time": "isti dan",
+        "service": "nadogradnja"
+      },
+      {
+        "key": "konektor",
+        "label": "Konektor za punjenje",
+        "min": 6000,
+        "max": 9000,
+        "time": "2–3 dana",
+        "service": "lemljenje-i-bga"
+      },
+      {
+        "key": "tastatura",
+        "label": "Zamena tastature",
+        "min": 4900,
+        "max": 9000,
+        "time": "1–2 dana",
+        "service": "ekrani-i-tastature"
+      }
+    ]
+  }
+}

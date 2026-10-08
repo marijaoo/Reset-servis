@@ -1,9 +1,10 @@
 # Render.com Blueprint: New > Blueprint > izaberite ovaj repozitorijum.
 services:
   - type: web
-    name: reset-servis
+    name: servis-sajt
     runtime: node
     plan: starter          # disk za bazu zahteva plaćeni plan; besplatan plan briše podatke pri restartu
+    region: frankfurt
     buildCommand: "true"
     startCommand: npm start
     healthCheckPath: /api/health
@@ -16,9 +17,17 @@ services:
         value: /var/data
       - key: ADMIN_PASSWORD
         sync: false
-      - key: SESSION_SECRET
-        generateValue: true
+      - key: SMTP_HOST
+        sync: false
+      - key: SMTP_PORT
+        value: "587"
+      - key: SMTP_USER
+        sync: false
+      - key: SMTP_PASS
+        sync: false
+      - key: MAIL_FROM
+        sync: false
     disk:
-      name: reset-data
+      name: servis-data
       mountPath: /var/data
       sizeGB: 1

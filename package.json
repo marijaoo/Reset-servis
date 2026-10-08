@@ -1,12 +1,14 @@
 {
   "name": "reset-servis",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "private": true,
   "description": "Sajt servisa laptopova i računara sa zakazivanjem, praćenjem statusa popravke i administratorskim panelom.",
-  "engines": { "node": ">=22.13" },
+  "engines": {
+    "node": ">=22.13"
+  },
   "scripts": {
     "start": "node --disable-warning=ExperimentalWarning server/server.js",
-    "build": "python3 tools/build.py",
+    "build": "node server/render/render.js public",
     "test": "node --disable-warning=ExperimentalWarning --test test/server.test.js"
   }
 }

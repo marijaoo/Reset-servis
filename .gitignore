@@ -1,4 +1,5 @@
 data/
+public/
 node_modules/
 .env
 *.db
